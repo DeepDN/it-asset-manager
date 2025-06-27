@@ -8,13 +8,19 @@
 
 > **A comprehensive web-based IT Asset Management System designed for Network and System Administrators to efficiently track, manage, and monitor IT assets, user access permissions, and organizational resources.**
 
+![Screenshot from 2025-06-26 17-06-19](https://github.com/user-attachments/assets/3928ced2-bf2f-41b0-9273-bd69b3350b0a)
+![Screenshot from 2025-06-26 17-06-43](https://github.com/user-attachments/assets/9381ee69-e6da-4411-ab43-eb629d5e4acf)
+![Screenshot from 2025-06-26 17-08-45](https://github.com/user-attachments/assets/4308d71d-1cf7-4303-a757-8fe8178bad9d)
+![Screenshot from 2025-06-26 17-09-36](https://github.com/user-attachments/assets/537306b8-d713-46bd-af73-6847e1d1981f)
+![Screenshot from 2025-06-26 17-10-07](https://github.com/user-attachments/assets/9c48fb3a-069d-48a7-9376-615e34a79ebc)
+
 ## 👨‍💻 **Author**
 
 **Deepak Nemade**  
 *Network & System Administrator | IT Asset Management Specialist*
 
 [![LinkedIn](https://img.shields.io/badge/LinkedIn-Connect-blue?style=for-the-badge&logo=linkedin)](https://www.linkedin.com/in/deepak-nemade/)
-[![GitHub](https://img.shields.io/badge/GitHub-Follow-black?style=for-the-badge&logo=github)](https://github.com/deepaknemade)
+[![GitHub](https://img.shields.io/badge/GitHub-Follow-black?style=for-the-badge&logo=github)](https://github.com/DeepDN)
 
 ---
 
