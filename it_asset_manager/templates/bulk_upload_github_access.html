@@ -1,0 +1,359 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bulk Upload GitHub Access - IT Asset Manager</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        .upload-area {
+            border: 2px dashed #007bff;
+            border-radius: 10px;
+            padding: 40px;
+            text-align: center;
+            background-color: #f8f9fa;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+        
+        .upload-area:hover {
+            border-color: #0056b3;
+            background-color: #e3f2fd;
+        }
+        
+        .upload-area.dragover {
+            border-color: #28a745;
+            background-color: #d4edda;
+        }
+        
+        .upload-icon {
+            font-size: 3rem;
+            color: #007bff;
+            margin-bottom: 1rem;
+        }
+        
+        .file-info {
+            background-color: #e9ecef;
+            border-radius: 5px;
+            padding: 10px;
+            margin-top: 10px;
+            display: none;
+        }
+        
+        .step-card {
+            border-left: 4px solid #007bff;
+            background-color: #f8f9fa;
+        }
+        
+        .step-number {
+            background-color: #007bff;
+            color: white;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+        }
+        
+        .btn-download {
+            background: linear-gradient(45deg, #28a745, #20c997);
+            border: none;
+            color: white;
+            transition: all 0.3s ease;
+        }
+        
+        .btn-download:hover {
+            background: linear-gradient(45deg, #218838, #1ea085);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+        }
+        
+        .btn-upload {
+            background: linear-gradient(45deg, #007bff, #6610f2);
+            border: none;
+            color: white;
+            transition: all 0.3s ease;
+        }
+        
+        .btn-upload:hover {
+            background: linear-gradient(45deg, #0056b3, #520dc2);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+        <div class="container">
+            <a class="navbar-brand" href="{{ url_for('main.dashboard') }}">
+                <i class="fas fa-laptop"></i> IT Asset Manager
+            </a>
+            <div class="navbar-nav ms-auto">
+                <a class="nav-link" href="{{ url_for('access.list_github_access') }}">
+                    <i class="fas fa-arrow-left"></i> Back to GitHub Access
+                </a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container mt-4">
+        <!-- Page Header -->
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h2><i class="fab fa-github text-primary"></i> Bulk Upload GitHub Access</h2>
+                        <p class="text-muted">Upload multiple GitHub repository access records at once using a CSV file</p>
+                    </div>
+                    <div>
+                        <a href="{{ url_for('access.download_sample_github_access_csv') }}" class="btn btn-download btn-lg">
+                            <i class="fas fa-download"></i> Download Sample CSV
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Flash Messages -->
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="alert alert-{{ 'danger' if category == 'error' else category }} alert-dismissible fade show" role="alert">
+                        <i class="fas fa-{{ 'exclamation-triangle' if category == 'error' else 'info-circle' if category == 'info' else 'check-circle' }}"></i>
+                        {{ message }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+
+        <div class="row">
+            <!-- Upload Section -->
+            <div class="col-lg-8">
+                <div class="card shadow-sm">
+                    <div class="card-header bg-primary text-white">
+                        <h5 class="mb-0"><i class="fas fa-cloud-upload-alt"></i> Upload CSV File</h5>
+                    </div>
+                    <div class="card-body">
+                        <form method="POST" enctype="multipart/form-data" id="uploadForm">
+                            <div class="upload-area" id="uploadArea">
+                                <div class="upload-icon">
+                                    <i class="fas fa-cloud-upload-alt"></i>
+                                </div>
+                                <h5>Drag & Drop your CSV file here</h5>
+                                <p class="text-muted">or click to browse files</p>
+                                <input type="file" name="csv_file" id="csvFile" accept=".csv" style="display: none;" required>
+                                <div class="file-info" id="fileInfo">
+                                    <i class="fas fa-file-csv text-success"></i>
+                                    <span id="fileName"></span>
+                                    <small class="text-muted d-block" id="fileSize"></small>
+                                </div>
+                            </div>
+                            
+                            <div class="mt-4 text-center">
+                                <button type="submit" class="btn btn-upload btn-lg" id="uploadBtn" disabled>
+                                    <i class="fas fa-upload"></i> Upload & Import GitHub Access
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Instructions Section -->
+            <div class="col-lg-4">
+                <div class="card shadow-sm">
+                    <div class="card-header bg-info text-white">
+                        <h5 class="mb-0"><i class="fas fa-info-circle"></i> How to Use</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="step-card card mb-3">
+                            <div class="card-body">
+                                <div class="d-flex align-items-center mb-2">
+                                    <div class="step-number me-3">1</div>
+                                    <h6 class="mb-0">Download Template</h6>
+                                </div>
+                                <p class="text-muted small mb-0">Download the sample CSV file to see the required format and example data.</p>
+                            </div>
+                        </div>
+
+                        <div class="step-card card mb-3">
+                            <div class="card-body">
+                                <div class="d-flex align-items-center mb-2">
+                                    <div class="step-number me-3">2</div>
+                                    <h6 class="mb-0">Fill Your Data</h6>
+                                </div>
+                                <p class="text-muted small mb-0">Replace sample data with your actual GitHub access information. Keep the headers unchanged.</p>
+                            </div>
+                        </div>
+
+                        <div class="step-card card mb-3">
+                            <div class="card-body">
+                                <div class="d-flex align-items-center mb-2">
+                                    <div class="step-number me-3">3</div>
+                                    <h6 class="mb-0">Upload File</h6>
+                                </div>
+                                <p class="text-muted small mb-0">Upload your completed CSV file. The system will validate and import your GitHub access records.</p>
+                            </div>
+                        </div>
+
+                        <div class="alert alert-info">
+                            <h6><i class="fas fa-lightbulb"></i> Tips:</h6>
+                            <ul class="small mb-0">
+                                <li>Required fields: user_name, organization_name, repo_name, access_type</li>
+                                <li>Use YYYY-MM-DD format for dates</li>
+                                <li>Existing access will be updated</li>
+                                <li>Access types: admin, write, read, maintainer</li>
+                                <li>Status: active, revoked</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Sample Data Preview -->
+        <div class="row mt-4">
+            <div class="col-12">
+                <div class="card shadow-sm">
+                    <div class="card-header bg-secondary text-white">
+                        <h5 class="mb-0"><i class="fas fa-table"></i> Sample Data Preview</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table table-sm">
+                                <thead class="table-dark">
+                                    <tr>
+                                        <th>User Name</th>
+                                        <th>Organization</th>
+                                        <th>Repository</th>
+                                        <th>Access Type</th>
+                                        <th>Assign Date</th>
+                                        <th>Status</th>
+                                        <th>Remarks</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td>john.doe</td>
+                                        <td>company-org</td>
+                                        <td>main-application</td>
+                                        <td><span class="badge bg-danger">admin</span></td>
+                                        <td>2024-01-15</td>
+                                        <td><span class="badge bg-success">active</span></td>
+                                        <td>Lead developer access</td>
+                                    </tr>
+                                    <tr>
+                                        <td>jane.smith</td>
+                                        <td>company-org</td>
+                                        <td>frontend-app</td>
+                                        <td><span class="badge bg-warning">write</span></td>
+                                        <td>2024-02-01</td>
+                                        <td><span class="badge bg-success">active</span></td>
+                                        <td>Frontend developer</td>
+                                    </tr>
+                                    <tr>
+                                        <td>mike.wilson</td>
+                                        <td>company-org</td>
+                                        <td>test-automation</td>
+                                        <td><span class="badge bg-info">read</span></td>
+                                        <td>2024-01-20</td>
+                                        <td><span class="badge bg-secondary">revoked</span></td>
+                                        <td>QA team member - access revoked</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        <p class="text-muted small mt-2">
+                            <i class="fas fa-info-circle"></i> 
+                            This is a preview of the sample data included in the CSV template.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const uploadArea = document.getElementById('uploadArea');
+            const fileInput = document.getElementById('csvFile');
+            const fileInfo = document.getElementById('fileInfo');
+            const fileName = document.getElementById('fileName');
+            const fileSize = document.getElementById('fileSize');
+            const uploadBtn = document.getElementById('uploadBtn');
+
+            // Click to upload
+            uploadArea.addEventListener('click', function() {
+                fileInput.click();
+            });
+
+            // File selection
+            fileInput.addEventListener('change', function(e) {
+                handleFileSelect(e.target.files[0]);
+            });
+
+            // Drag and drop
+            uploadArea.addEventListener('dragover', function(e) {
+                e.preventDefault();
+                uploadArea.classList.add('dragover');
+            });
+
+            uploadArea.addEventListener('dragleave', function(e) {
+                e.preventDefault();
+                uploadArea.classList.remove('dragover');
+            });
+
+            uploadArea.addEventListener('drop', function(e) {
+                e.preventDefault();
+                uploadArea.classList.remove('dragover');
+                
+                const files = e.dataTransfer.files;
+                if (files.length > 0) {
+                    const file = files[0];
+                    if (file.type === 'text/csv' || file.name.endsWith('.csv')) {
+                        fileInput.files = files;
+                        handleFileSelect(file);
+                    } else {
+                        alert('Please select a CSV file');
+                    }
+                }
+            });
+
+            function handleFileSelect(file) {
+                if (file) {
+                    fileName.textContent = file.name;
+                    fileSize.textContent = formatFileSize(file.size);
+                    fileInfo.style.display = 'block';
+                    uploadBtn.disabled = false;
+                    uploadBtn.classList.remove('btn-secondary');
+                    uploadBtn.classList.add('btn-upload');
+                } else {
+                    fileInfo.style.display = 'none';
+                    uploadBtn.disabled = true;
+                    uploadBtn.classList.add('btn-secondary');
+                    uploadBtn.classList.remove('btn-upload');
+                }
+            }
+
+            function formatFileSize(bytes) {
+                if (bytes === 0) return '0 Bytes';
+                const k = 1024;
+                const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+                const i = Math.floor(Math.log(bytes) / Math.log(k));
+                return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+            }
+
+            // Form submission with loading state
+            document.getElementById('uploadForm').addEventListener('submit', function() {
+                uploadBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processing...';
+                uploadBtn.disabled = true;
+            });
+        });
+    </script>
+</body>
+</html>

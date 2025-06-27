@@ -8,7 +8,12 @@ database connectivity checks, and system status information.
 from flask import Blueprint, jsonify
 from datetime import datetime
 import os
-import psutil
+
+try:
+    import psutil
+    PSUTIL_AVAILABLE = True
+except ImportError:
+    PSUTIL_AVAILABLE = False
 
 from ..core.database import db
 from ..models.user import User
@@ -57,19 +62,28 @@ def detailed_health_check():
         db_info = {'error': str(e)}
     
     # System information
-    try:
-        memory = psutil.virtual_memory()
-        disk = psutil.disk_usage('/')
+    if PSUTIL_AVAILABLE:
+        try:
+            memory = psutil.virtual_memory()
+            disk = psutil.disk_usage('/')
+            system_info = {
+                'memory_usage_percent': memory.percent,
+                'memory_available_mb': memory.available // (1024 * 1024),
+                'disk_usage_percent': disk.percent,
+                'disk_free_gb': disk.free // (1024 * 1024 * 1024),
+                'cpu_count': psutil.cpu_count(),
+                'load_average': os.getloadavg() if hasattr(os, 'getloadavg') else None
+            }
+        except Exception as e:
+            system_info = {'error': str(e)}
+    else:
         system_info = {
-            'memory_usage_percent': memory.percent,
-            'memory_available_mb': memory.available // (1024 * 1024),
-            'disk_usage_percent': disk.percent,
-            'disk_free_gb': disk.free // (1024 * 1024 * 1024),
-            'cpu_count': psutil.cpu_count(),
-            'load_average': os.getloadavg() if hasattr(os, 'getloadavg') else None
+            'message': 'System monitoring unavailable (psutil not installed)',
+            'basic_info': {
+                'platform': os.name,
+                'pid': os.getpid()
+            }
         }
-    except Exception as e:
-        system_info = {'error': str(e)}
     
     overall_status = 'healthy' if db_status == 'healthy' else 'unhealthy'
     

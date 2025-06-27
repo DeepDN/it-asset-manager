@@ -5,11 +5,13 @@ This module contains all routes related to asset management including
 CRUD operations, assignment, and reporting.
 """
 
-from flask import Blueprint, render_template, request, redirect, url_for, flash, send_file, jsonify
+from flask import Blueprint, render_template, request, redirect, url_for, flash, send_file, jsonify, Response
 from flask_login import login_required
+from werkzeug.utils import secure_filename
 import io
 
 from ..services.asset_service import AssetService
+from ..services.csv_service import CSVService
 from ..models.asset import Asset
 from ..core.database import db
 
@@ -265,3 +267,96 @@ def api_statistics():
         return jsonify(stats)
     except Exception as e:
         return jsonify({'error': str(e)}), 500
+
+
+@assets_bp.route('/bulk-upload', methods=['GET', 'POST'])
+@login_required
+def bulk_upload():
+    """
+    Bulk upload assets from CSV file.
+    
+    GET: Display bulk upload form
+    POST: Process CSV file upload
+    """
+    if request.method == 'POST':
+        # Check if file was uploaded
+        if 'csv_file' not in request.files:
+            flash('No file selected', 'error')
+            return redirect(request.url)
+        
+        file = request.files['csv_file']
+        
+        # Check if file is selected
+        if file.filename == '':
+            flash('No file selected', 'error')
+            return redirect(request.url)
+        
+        # Check file extension
+        if not file.filename.lower().endswith('.csv'):
+            flash('Please upload a CSV file', 'error')
+            return redirect(request.url)
+        
+        try:
+            # Read file content
+            file_content = file.read().decode('utf-8')
+            
+            # Parse and validate CSV data
+            valid_rows, parse_errors = CSVService.parse_csv_file(file_content)
+            
+            if parse_errors:
+                for error in parse_errors:
+                    flash(error, 'error')
+                return render_template('bulk_upload.html')
+            
+            if not valid_rows:
+                flash('No valid data found in CSV file', 'error')
+                return render_template('bulk_upload.html')
+            
+            # Import assets
+            created_count, updated_count, import_errors = CSVService.bulk_import_assets(valid_rows)
+            
+            # Display results
+            if import_errors:
+                for error in import_errors:
+                    flash(error, 'error')
+            
+            if created_count > 0 or updated_count > 0:
+                success_msg = f"Import completed: {created_count} assets created, {updated_count} assets updated"
+                flash(success_msg, 'success')
+                return redirect(url_for('assets.list_assets'))
+            else:
+                flash('No assets were imported', 'warning')
+                
+        except Exception as e:
+            flash(f'Error processing file: {str(e)}', 'error')
+    
+    return render_template('bulk_upload.html')
+
+
+@assets_bp.route('/download-sample-csv')
+@login_required
+def download_sample_csv():
+    """
+    Download sample CSV file for bulk upload.
+    
+    Returns:
+        CSV file download with sample data
+    """
+    try:
+        # Generate sample CSV
+        csv_data = CSVService.generate_sample_csv()
+        
+        # Create response
+        response = Response(
+            csv_data.getvalue(),
+            mimetype='text/csv',
+            headers={
+                'Content-Disposition': 'attachment; filename=asset_sample_template.csv'
+            }
+        )
+        
+        return response
+        
+    except Exception as e:
+        flash(f'Error generating sample CSV: {str(e)}', 'error')
+        return redirect(url_for('assets.list_assets'))

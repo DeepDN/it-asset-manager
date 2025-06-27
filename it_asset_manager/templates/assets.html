@@ -8,9 +8,17 @@
             <p class="text-muted mb-0">Manage and track all your IT equipment and devices</p>
         </div>
         <div>
-            <a href="{{ url_for('add_asset') }}" class="btn btn-primary">
-                <i class="fas fa-plus me-2"></i>Add New Asset
-            </a>
+            <div class="btn-group" role="group">
+                <a href="{{ url_for('assets.add_asset') }}" class="btn btn-primary">
+                    <i class="fas fa-plus me-2"></i>Add New Asset
+                </a>
+                <a href="{{ url_for('assets.bulk_upload') }}" class="btn btn-success">
+                    <i class="fas fa-upload me-2"></i>Bulk Upload
+                </a>
+                <a href="{{ url_for('assets.export_assets') }}" class="btn btn-outline-primary">
+                    <i class="fas fa-download me-2"></i>Export CSV
+                </a>
+            </div>
         </div>
     </div>
 </div>
@@ -252,7 +260,7 @@
                         </td>
                         <td>
                             <div class="btn-group" role="group">
-                                <a href="{{ url_for('edit_asset', id=asset.id) }}" class="btn btn-sm btn-outline-primary" title="Edit Asset">
+                                <a href="{{ url_for('assets.edit_asset', asset_id=asset.id) }}" class="btn btn-sm btn-outline-primary" title="Edit Asset">
                                     <i class="fas fa-edit"></i>
                                 </a>
                                 <button class="btn btn-sm btn-outline-info" title="View Details" onclick="showAssetDetails({{ asset.id }})">
@@ -267,7 +275,7 @@
                             <div class="text-muted">
                                 <i class="fas fa-inbox fa-3x mb-3"></i>
                                 <h5>No assets found</h5>
-                                <p>Try adjusting your filters or <a href="{{ url_for('add_asset') }}">add a new asset</a></p>
+                                <p>Try adjusting your filters or <a href="{{ url_for('assets.add_asset') }}">add a new asset</a></p>
                             </div>
                         </td>
                     </tr>

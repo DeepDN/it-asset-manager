@@ -347,54 +347,34 @@
                     
                     <ul class="nav flex-column px-2">
                         <li class="nav-item">
-                            <a class="nav-link {% if request.endpoint == 'dashboard' %}active{% endif %}" href="{{ url_for('dashboard') }}">
+                            <a class="nav-link {% if request.endpoint == 'main.dashboard' %}active{% endif %}" href="{{ url_for('main.dashboard') }}">
                                 <i class="fas fa-tachometer-alt"></i> Dashboard
                             </a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link {% if request.endpoint in ['assets', 'add_asset', 'edit_asset'] %}active{% endif %}" href="{{ url_for('assets') }}">
+                            <a class="nav-link {% if request.endpoint in ['assets.list_assets', 'assets.add_asset', 'assets.edit_asset', 'assets.bulk_upload'] %}active{% endif %}" href="{{ url_for('assets.list_assets') }}">
                                 <i class="fas fa-laptop"></i> Assets
                             </a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link {% if request.endpoint in ['app_access', 'add_app_access'] %}active{% endif %}" href="{{ url_for('app_access') }}">
+                            <a class="nav-link {% if request.endpoint in ['access.list_application_access', 'access.add_application_access', 'access.bulk_upload_application_access'] %}active{% endif %}" href="{{ url_for('access.list_application_access') }}">
                                 <i class="fas fa-users-cog"></i> App Access
                             </a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link {% if request.endpoint in ['github_access', 'add_github_access'] %}active{% endif %}" href="{{ url_for('github_access') }}">
+                            <a class="nav-link {% if request.endpoint in ['access.list_github_access', 'access.add_github_access', 'access.bulk_upload_github_access'] %}active{% endif %}" href="{{ url_for('access.list_github_access') }}">
                                 <i class="fab fa-github"></i> GitHub Access
                             </a>
                         </li>
                         
-                        <li class="nav-item mt-4">
-                            <div class="sidebar-heading px-3">
-                                <i class="fas fa-download"></i> Export Data
-                            </div>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="{{ url_for('export_assets') }}">
-                                <i class="fas fa-file-csv"></i> Export Assets
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="{{ url_for('export_app_access') }}">
-                                <i class="fas fa-file-csv"></i> Export App Access
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="{{ url_for('export_github_access') }}">
-                                <i class="fas fa-file-csv"></i> Export GitHub Access
-                            </a>
-                        </li>
                         
                         <li class="nav-item mt-4 pt-3" style="border-top: 1px solid rgba(255,255,255,0.1);">
-                            <a class="nav-link" href="{{ url_for('change_password') }}">
+                            <a class="nav-link" href="{{ url_for('auth.change_password') }}">
                                 <i class="fas fa-key"></i> Change Password
                             </a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link" href="{{ url_for('logout') }}">
+                            <a class="nav-link" href="{{ url_for('auth.logout') }}">
                                 <i class="fas fa-sign-out-alt"></i> Logout
                             </a>
                         </li>
