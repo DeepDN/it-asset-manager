@@ -20,7 +20,7 @@
                 <div class="row align-items-center">
                     <div class="col">
                         <h6 class="card-title text-uppercase mb-2" style="font-size: 0.75rem; opacity: 0.8;">Total Assets</h6>
-                        <span class="h2 font-weight-bold mb-0">{{ total_assets }}</span>
+                        <span class="h2 font-weight-bold mb-0">{{ asset_stats.total_assets if asset_stats else 0 }}</span>
                         <p class="mb-0 mt-2">
                             <small style="opacity: 0.8;">
                                 <i class="fas fa-chart-line me-1"></i>
@@ -44,7 +44,7 @@
                 <div class="row align-items-center">
                     <div class="col">
                         <h6 class="card-title text-uppercase mb-2" style="font-size: 0.75rem; opacity: 0.8;">Assigned Assets</h6>
-                        <span class="h2 font-weight-bold mb-0">{{ assigned_assets }}</span>
+                        <span class="h2 font-weight-bold mb-0">{{ asset_stats.assigned_assets if asset_stats else 0 }}</span>
                         <p class="mb-0 mt-2">
                             <small style="opacity: 0.8;">
                                 <i class="fas fa-user-check me-1"></i>
@@ -68,7 +68,7 @@
                 <div class="row align-items-center">
                     <div class="col">
                         <h6 class="card-title text-uppercase mb-2" style="font-size: 0.75rem; opacity: 0.8;">Available Assets</h6>
-                        <span class="h2 font-weight-bold mb-0">{{ unassigned_assets }}</span>
+                        <span class="h2 font-weight-bold mb-0">{{ asset_stats.unassigned_assets if asset_stats else 0 }}</span>
                         <p class="mb-0 mt-2">
                             <small style="opacity: 0.8;">
                                 <i class="fas fa-box me-1"></i>
@@ -92,7 +92,7 @@
                 <div class="row align-items-center">
                     <div class="col">
                         <h6 class="card-title text-uppercase mb-2" style="font-size: 0.75rem; opacity: 0.8;">Active Access</h6>
-                        <span class="h2 font-weight-bold mb-0">{{ total_app_access }}</span>
+                        <span class="h2 font-weight-bold mb-0">{{ access_stats.application_access.active if access_stats and access_stats.application_access else 0 }}</span>
                         <p class="mb-0 mt-2">
                             <small style="opacity: 0.8;">
                                 <i class="fas fa-shield-alt me-1"></i>
@@ -122,7 +122,7 @@
             <div class="card-body">
                 <div class="row">
                     <div class="col-md-6 mb-3">
-                        <a href="{{ url_for('add_asset') }}" class="btn btn-primary w-100 py-3">
+                        <a href="{{ url_for('assets.add_asset') }}" class="btn btn-primary w-100 py-3">
                             <i class="fas fa-plus-circle me-2"></i>
                             <div>
                                 <strong>Add New Asset</strong>
@@ -131,7 +131,7 @@
                         </a>
                     </div>
                     <div class="col-md-6 mb-3">
-                        <a href="{{ url_for('add_app_access') }}" class="btn btn-outline-primary w-100 py-3">
+                        <a href="{{ url_for('access.add_application_access') }}" class="btn btn-outline-primary w-100 py-3">
                             <i class="fas fa-user-plus me-2"></i>
                             <div>
                                 <strong>Grant App Access</strong>
@@ -140,7 +140,7 @@
                         </a>
                     </div>
                     <div class="col-md-6 mb-3">
-                        <a href="{{ url_for('add_github_access') }}" class="btn btn-outline-primary w-100 py-3">
+                        <a href="{{ url_for('access.add_github_access') }}" class="btn btn-outline-primary w-100 py-3">
                             <i class="fab fa-github me-2"></i>
                             <div>
                                 <strong>Add GitHub Access</strong>
@@ -149,7 +149,7 @@
                         </a>
                     </div>
                     <div class="col-md-6 mb-3">
-                        <a href="{{ url_for('assets') }}" class="btn btn-outline-primary w-100 py-3">
+                        <a href="{{ url_for('assets.list_assets') }}" class="btn btn-outline-primary w-100 py-3">
                             <i class="fas fa-search me-2"></i>
                             <div>
                                 <strong>View All Assets</strong>
@@ -171,15 +171,15 @@
             </div>
             <div class="card-body">
                 <div class="d-grid gap-3">
-                    <a href="{{ url_for('export_assets') }}" class="btn btn-outline-info">
+                    <a href="{{ url_for('assets.export_assets') }}" class="btn btn-outline-info">
                         <i class="fas fa-file-csv me-2"></i>Assets Report
                         <small class="d-block text-dark">Complete inventory export</small>
                     </a>
-                    <a href="{{ url_for('export_app_access') }}" class="btn btn-outline-info">
+                    <a href="{{ url_for('access.export_application_access') }}" class="btn btn-outline-info">
                         <i class="fas fa-file-csv me-2"></i>Access Report
                         <small class="d-block text-dark">Application permissions audit</small>
                     </a>
-                    <a href="{{ url_for('export_github_access') }}" class="btn btn-outline-info">
+                    <a href="{{ url_for('access.export_github_access') }}" class="btn btn-outline-info">
                         <i class="fas fa-file-csv me-2"></i>GitHub Report
                         <small class="d-block text-dark">Repository access audit</small>
                     </a>
@@ -202,28 +202,28 @@
                     <div class="col-md-3 mb-3">
                         <div class="p-3">
                             <i class="fab fa-github fa-2x text-dark mb-2"></i>
-                            <h4 class="mb-1">{{ total_github_access }}</h4>
+                            <h4 class="mb-1">{{ access_stats.github_access.total if access_stats and access_stats.github_access else 0 }}</h4>
                             <small class="text-muted">GitHub Access Records</small>
                         </div>
                     </div>
                     <div class="col-md-3 mb-3">
                         <div class="p-3">
                             <i class="fas fa-users-cog fa-2x text-primary mb-2"></i>
-                            <h4 class="mb-1">{{ total_app_access }}</h4>
+                            <h4 class="mb-1">{{ access_stats.application_access.total if access_stats and access_stats.application_access else 0 }}</h4>
                             <small class="text-muted">Application Access Records</small>
                         </div>
                     </div>
                     <div class="col-md-3 mb-3">
                         <div class="p-3">
                             <i class="fas fa-laptop fa-2x text-success mb-2"></i>
-                            <h4 class="mb-1">{{ total_assets }}</h4>
+                            <h4 class="mb-1">{{ asset_stats.total_assets if asset_stats else 0 }}</h4>
                             <small class="text-muted">Total IT Assets</small>
                         </div>
                     </div>
                     <div class="col-md-3 mb-3">
                         <div class="p-3">
                             <i class="fas fa-shield-alt fa-2x text-warning mb-2"></i>
-                            <h4 class="mb-1">{{ (total_app_access + total_github_access) }}</h4>
+                            <h4 class="mb-1">{{ ((access_stats.application_access.total if access_stats and access_stats.application_access else 0) + (access_stats.github_access.total if access_stats and access_stats.github_access else 0)) }}</h4>
                             <small class="text-muted">Total Access Permissions</small>
                         </div>
                     </div>

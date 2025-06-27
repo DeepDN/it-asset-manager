@@ -26,7 +26,10 @@ def create_app(config_name: Optional[str] = None) -> Flask:
     Returns:
         Configured Flask application instance
     """
-    app = Flask(__name__)
+    # Create Flask app with explicit template and static folder paths
+    app = Flask(__name__, 
+                template_folder='../templates',
+                static_folder='../static')
     
     # Load configuration
     config_class = get_config(config_name)

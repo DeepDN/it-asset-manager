@@ -1,0 +1,379 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bulk Upload Assets - IT Asset Manager</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        .upload-area {
+            border: 2px dashed #007bff;
+            border-radius: 10px;
+            padding: 40px;
+            text-align: center;
+            background-color: #f8f9fa;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+        
+        .upload-area:hover {
+            border-color: #0056b3;
+            background-color: #e3f2fd;
+        }
+        
+        .upload-area.dragover {
+            border-color: #28a745;
+            background-color: #d4edda;
+        }
+        
+        .upload-icon {
+            font-size: 3rem;
+            color: #007bff;
+            margin-bottom: 1rem;
+        }
+        
+        .file-info {
+            background-color: #e9ecef;
+            border-radius: 5px;
+            padding: 10px;
+            margin-top: 10px;
+            display: none;
+        }
+        
+        .step-card {
+            border-left: 4px solid #007bff;
+            background-color: #f8f9fa;
+        }
+        
+        .step-number {
+            background-color: #007bff;
+            color: white;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+        }
+        
+        .sample-data-table {
+            font-size: 0.85rem;
+        }
+        
+        .alert-info {
+            border-left: 4px solid #17a2b8;
+        }
+        
+        .btn-download {
+            background: linear-gradient(45deg, #28a745, #20c997);
+            border: none;
+            color: white;
+            transition: all 0.3s ease;
+        }
+        
+        .btn-download:hover {
+            background: linear-gradient(45deg, #218838, #1ea085);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+        }
+        
+        .btn-upload {
+            background: linear-gradient(45deg, #007bff, #6610f2);
+            border: none;
+            color: white;
+            transition: all 0.3s ease;
+        }
+        
+        .btn-upload:hover {
+            background: linear-gradient(45deg, #0056b3, #520dc2);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+        <div class="container">
+            <a class="navbar-brand" href="{{ url_for('main.dashboard') }}">
+                <i class="fas fa-laptop"></i> IT Asset Manager
+            </a>
+            <div class="navbar-nav ms-auto">
+                <a class="nav-link" href="{{ url_for('assets.list_assets') }}">
+                    <i class="fas fa-arrow-left"></i> Back to Assets
+                </a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container mt-4">
+        <!-- Page Header -->
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h2><i class="fas fa-upload text-primary"></i> Bulk Upload Assets</h2>
+                        <p class="text-muted">Upload multiple assets at once using a CSV file</p>
+                    </div>
+                    <div>
+                        <a href="{{ url_for('assets.download_sample_csv') }}" class="btn btn-download btn-lg">
+                            <i class="fas fa-download"></i> Download Sample CSV
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Flash Messages -->
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="alert alert-{{ 'danger' if category == 'error' else category }} alert-dismissible fade show" role="alert">
+                        <i class="fas fa-{{ 'exclamation-triangle' if category == 'error' else 'info-circle' if category == 'info' else 'check-circle' }}"></i>
+                        {{ message }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+
+        <div class="row">
+            <!-- Upload Section -->
+            <div class="col-lg-8">
+                <div class="card shadow-sm">
+                    <div class="card-header bg-primary text-white">
+                        <h5 class="mb-0"><i class="fas fa-cloud-upload-alt"></i> Upload CSV File</h5>
+                    </div>
+                    <div class="card-body">
+                        <form method="POST" enctype="multipart/form-data" id="uploadForm">
+                            <div class="upload-area" id="uploadArea">
+                                <div class="upload-icon">
+                                    <i class="fas fa-cloud-upload-alt"></i>
+                                </div>
+                                <h5>Drag & Drop your CSV file here</h5>
+                                <p class="text-muted">or click to browse files</p>
+                                <input type="file" name="csv_file" id="csvFile" accept=".csv" style="display: none;" required>
+                                <div class="file-info" id="fileInfo">
+                                    <i class="fas fa-file-csv text-success"></i>
+                                    <span id="fileName"></span>
+                                    <small class="text-muted d-block" id="fileSize"></small>
+                                </div>
+                            </div>
+                            
+                            <div class="mt-4 text-center">
+                                <button type="submit" class="btn btn-upload btn-lg" id="uploadBtn" disabled>
+                                    <i class="fas fa-upload"></i> Upload & Import Assets
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Instructions Section -->
+            <div class="col-lg-4">
+                <div class="card shadow-sm">
+                    <div class="card-header bg-info text-white">
+                        <h5 class="mb-0"><i class="fas fa-info-circle"></i> How to Use</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="step-card card mb-3">
+                            <div class="card-body">
+                                <div class="d-flex align-items-center mb-2">
+                                    <div class="step-number me-3">1</div>
+                                    <h6 class="mb-0">Download Template</h6>
+                                </div>
+                                <p class="text-muted small mb-0">Download the sample CSV file to see the required format and example data.</p>
+                            </div>
+                        </div>
+
+                        <div class="step-card card mb-3">
+                            <div class="card-body">
+                                <div class="d-flex align-items-center mb-2">
+                                    <div class="step-number me-3">2</div>
+                                    <h6 class="mb-0">Fill Your Data</h6>
+                                </div>
+                                <p class="text-muted small mb-0">Replace sample data with your actual asset information. Keep the headers unchanged.</p>
+                            </div>
+                        </div>
+
+                        <div class="step-card card mb-3">
+                            <div class="card-body">
+                                <div class="d-flex align-items-center mb-2">
+                                    <div class="step-number me-3">3</div>
+                                    <h6 class="mb-0">Upload File</h6>
+                                </div>
+                                <p class="text-muted small mb-0">Upload your completed CSV file. The system will validate and import your assets.</p>
+                            </div>
+                        </div>
+
+                        <div class="alert alert-info">
+                            <h6><i class="fas fa-lightbulb"></i> Tips:</h6>
+                            <ul class="small mb-0">
+                                <li>Asset tags must be unique</li>
+                                <li>Serial numbers must be unique</li>
+                                <li>Use YYYY-MM-DD format for dates</li>
+                                <li>Existing assets will be updated</li>
+                                <li>Required fields: asset_tag, asset_type, serial_number</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Sample Data Preview -->
+        <div class="row mt-4">
+            <div class="col-12">
+                <div class="card shadow-sm">
+                    <div class="card-header bg-secondary text-white">
+                        <h5 class="mb-0"><i class="fas fa-table"></i> Sample Data Preview</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table table-sm sample-data-table">
+                                <thead class="table-dark">
+                                    <tr>
+                                        <th>Asset Tag</th>
+                                        <th>Asset Type</th>
+                                        <th>Category</th>
+                                        <th>Brand</th>
+                                        <th>Model</th>
+                                        <th>Serial Number</th>
+                                        <th>Ownership</th>
+                                        <th>Status</th>
+                                        <th>Assigned To</th>
+                                        <th>Location</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td><span class="badge bg-primary">LAP0001</span></td>
+                                        <td>laptop</td>
+                                        <td>Computing</td>
+                                        <td>Dell</td>
+                                        <td>Latitude 5520</td>
+                                        <td>DL123456789</td>
+                                        <td><span class="badge bg-success">purchased</span></td>
+                                        <td><span class="badge bg-info">assigned</span></td>
+                                        <td>john.doe</td>
+                                        <td>Office Floor 2, Desk 15</td>
+                                    </tr>
+                                    <tr>
+                                        <td><span class="badge bg-primary">RTR0001</span></td>
+                                        <td>router</td>
+                                        <td>Network</td>
+                                        <td>Cisco</td>
+                                        <td>ISR 4331</td>
+                                        <td>CS987654321</td>
+                                        <td><span class="badge bg-warning">rented</span></td>
+                                        <td><span class="badge bg-secondary">unassigned</span></td>
+                                        <td>-</td>
+                                        <td>Server Room A, Rack 1</td>
+                                    </tr>
+                                    <tr>
+                                        <td><span class="badge bg-primary">MON0001</span></td>
+                                        <td>monitor</td>
+                                        <td>Display</td>
+                                        <td>Samsung</td>
+                                        <td>Odyssey G5</td>
+                                        <td>SM456789123</td>
+                                        <td><span class="badge bg-success">purchased</span></td>
+                                        <td><span class="badge bg-info">assigned</span></td>
+                                        <td>jane.smith</td>
+                                        <td>Office Floor 1, Desk 8</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        <p class="text-muted small mt-2">
+                            <i class="fas fa-info-circle"></i> 
+                            This is a preview of the sample data included in the CSV template. Download the template to see all available fields.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const uploadArea = document.getElementById('uploadArea');
+            const fileInput = document.getElementById('csvFile');
+            const fileInfo = document.getElementById('fileInfo');
+            const fileName = document.getElementById('fileName');
+            const fileSize = document.getElementById('fileSize');
+            const uploadBtn = document.getElementById('uploadBtn');
+
+            // Click to upload
+            uploadArea.addEventListener('click', function() {
+                fileInput.click();
+            });
+
+            // File selection
+            fileInput.addEventListener('change', function(e) {
+                handleFileSelect(e.target.files[0]);
+            });
+
+            // Drag and drop
+            uploadArea.addEventListener('dragover', function(e) {
+                e.preventDefault();
+                uploadArea.classList.add('dragover');
+            });
+
+            uploadArea.addEventListener('dragleave', function(e) {
+                e.preventDefault();
+                uploadArea.classList.remove('dragover');
+            });
+
+            uploadArea.addEventListener('drop', function(e) {
+                e.preventDefault();
+                uploadArea.classList.remove('dragover');
+                
+                const files = e.dataTransfer.files;
+                if (files.length > 0) {
+                    const file = files[0];
+                    if (file.type === 'text/csv' || file.name.endsWith('.csv')) {
+                        fileInput.files = files;
+                        handleFileSelect(file);
+                    } else {
+                        alert('Please select a CSV file');
+                    }
+                }
+            });
+
+            function handleFileSelect(file) {
+                if (file) {
+                    fileName.textContent = file.name;
+                    fileSize.textContent = formatFileSize(file.size);
+                    fileInfo.style.display = 'block';
+                    uploadBtn.disabled = false;
+                    uploadBtn.classList.remove('btn-secondary');
+                    uploadBtn.classList.add('btn-upload');
+                } else {
+                    fileInfo.style.display = 'none';
+                    uploadBtn.disabled = true;
+                    uploadBtn.classList.add('btn-secondary');
+                    uploadBtn.classList.remove('btn-upload');
+                }
+            }
+
+            function formatFileSize(bytes) {
+                if (bytes === 0) return '0 Bytes';
+                const k = 1024;
+                const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+                const i = Math.floor(Math.log(bytes) / Math.log(k));
+                return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+            }
+
+            // Form submission with loading state
+            document.getElementById('uploadForm').addEventListener('submit', function() {
+                uploadBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processing...';
+                uploadBtn.disabled = true;
+            });
+        });
+    </script>
+</body>
+</html>

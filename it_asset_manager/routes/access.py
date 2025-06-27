@@ -4,11 +4,14 @@ Access management routes.
 This module contains all routes related to application and GitHub access management.
 """
 
-from flask import Blueprint, render_template, request, redirect, url_for, flash, send_file, jsonify
+from flask import Blueprint, render_template, request, redirect, url_for, flash, send_file, jsonify, Response
 from flask_login import login_required
+from werkzeug.utils import secure_filename
 import io
 
 from ..services.access_service import AccessService
+from ..services.app_access_csv_service import AppAccessCSVService
+from ..services.github_access_csv_service import GitHubAccessCSVService
 from ..models.access import ApplicationAccess, GitHubAccess
 from ..core.database import db
 
@@ -52,7 +55,7 @@ def list_application_access():
         
         return render_template(
             'app_access.html',
-            access_records=access_records,
+            accesses=access_records,
             users=[u[0] for u in users],
             applications=[a[0] for a in applications],
             current_user=username,
@@ -62,7 +65,7 @@ def list_application_access():
         
     except Exception as e:
         flash(f"Error loading application access: {str(e)}", 'error')
-        return render_template('app_access.html', access_records=[])
+        return render_template('app_access.html', accesses=[])
 
 
 @access_bp.route('/applications/add', methods=['GET', 'POST'])
@@ -177,7 +180,7 @@ def list_github_access():
         
         return render_template(
             'github_access.html',
-            access_records=access_records,
+            accesses=access_records,
             users=[u[0] for u in users],
             organizations=[o[0] for o in organizations],
             repositories=[r[0] for r in repositories],
@@ -189,7 +192,7 @@ def list_github_access():
         
     except Exception as e:
         flash(f"Error loading GitHub access: {str(e)}", 'error')
-        return render_template('github_access.html', access_records=[])
+        return render_template('github_access.html', accesses=[])
 
 
 @access_bp.route('/github/add', methods=['GET', 'POST'])
@@ -337,3 +340,193 @@ def api_access_statistics():
         return jsonify(stats)
     except Exception as e:
         return jsonify({'error': str(e)}), 500
+
+
+# Application Access CSV Routes
+
+@access_bp.route('/applications/bulk-upload', methods=['GET', 'POST'])
+@login_required
+def bulk_upload_application_access():
+    """
+    Bulk upload application access from CSV file.
+    
+    GET: Display bulk upload form
+    POST: Process CSV file upload
+    """
+    if request.method == 'POST':
+        # Check if file was uploaded
+        if 'csv_file' not in request.files:
+            flash('No file selected', 'error')
+            return redirect(request.url)
+        
+        file = request.files['csv_file']
+        
+        # Check if file is selected
+        if file.filename == '':
+            flash('No file selected', 'error')
+            return redirect(request.url)
+        
+        # Check file extension
+        if not file.filename.lower().endswith('.csv'):
+            flash('Please upload a CSV file', 'error')
+            return redirect(request.url)
+        
+        try:
+            # Read file content
+            file_content = file.read().decode('utf-8')
+            
+            # Parse and validate CSV data
+            valid_rows, parse_errors = AppAccessCSVService.parse_csv_file(file_content)
+            
+            if parse_errors:
+                for error in parse_errors:
+                    flash(error, 'error')
+                return render_template('bulk_upload_app_access.html')
+            
+            if not valid_rows:
+                flash('No valid data found in CSV file', 'error')
+                return render_template('bulk_upload_app_access.html')
+            
+            # Import application access
+            created_count, updated_count, import_errors = AppAccessCSVService.bulk_import_app_access(valid_rows)
+            
+            # Display results
+            if import_errors:
+                for error in import_errors:
+                    flash(error, 'error')
+            
+            if created_count > 0 or updated_count > 0:
+                success_msg = f"Import completed: {created_count} access records created, {updated_count} access records updated"
+                flash(success_msg, 'success')
+                return redirect(url_for('access.list_application_access'))
+            else:
+                flash('No access records were imported', 'warning')
+                
+        except Exception as e:
+            flash(f'Error processing file: {str(e)}', 'error')
+    
+    return render_template('bulk_upload_app_access.html')
+
+
+@access_bp.route('/applications/download-sample-csv')
+@login_required
+def download_sample_app_access_csv():
+    """
+    Download sample CSV file for application access bulk upload.
+    
+    Returns:
+        CSV file download with sample data
+    """
+    try:
+        # Generate sample CSV
+        csv_data = AppAccessCSVService.generate_sample_csv()
+        
+        # Create response
+        response = Response(
+            csv_data.getvalue(),
+            mimetype='text/csv',
+            headers={
+                'Content-Disposition': 'attachment; filename=app_access_sample_template.csv'
+            }
+        )
+        
+        return response
+        
+    except Exception as e:
+        flash(f'Error generating sample CSV: {str(e)}', 'error')
+        return redirect(url_for('access.list_application_access'))
+
+
+# GitHub Access CSV Routes
+
+@access_bp.route('/github/bulk-upload', methods=['GET', 'POST'])
+@login_required
+def bulk_upload_github_access():
+    """
+    Bulk upload GitHub access from CSV file.
+    
+    GET: Display bulk upload form
+    POST: Process CSV file upload
+    """
+    if request.method == 'POST':
+        # Check if file was uploaded
+        if 'csv_file' not in request.files:
+            flash('No file selected', 'error')
+            return redirect(request.url)
+        
+        file = request.files['csv_file']
+        
+        # Check if file is selected
+        if file.filename == '':
+            flash('No file selected', 'error')
+            return redirect(request.url)
+        
+        # Check file extension
+        if not file.filename.lower().endswith('.csv'):
+            flash('Please upload a CSV file', 'error')
+            return redirect(request.url)
+        
+        try:
+            # Read file content
+            file_content = file.read().decode('utf-8')
+            
+            # Parse and validate CSV data
+            valid_rows, parse_errors = GitHubAccessCSVService.parse_csv_file(file_content)
+            
+            if parse_errors:
+                for error in parse_errors:
+                    flash(error, 'error')
+                return render_template('bulk_upload_github_access.html')
+            
+            if not valid_rows:
+                flash('No valid data found in CSV file', 'error')
+                return render_template('bulk_upload_github_access.html')
+            
+            # Import GitHub access
+            created_count, updated_count, import_errors = GitHubAccessCSVService.bulk_import_github_access(valid_rows)
+            
+            # Display results
+            if import_errors:
+                for error in import_errors:
+                    flash(error, 'error')
+            
+            if created_count > 0 or updated_count > 0:
+                success_msg = f"Import completed: {created_count} access records created, {updated_count} access records updated"
+                flash(success_msg, 'success')
+                return redirect(url_for('access.list_github_access'))
+            else:
+                flash('No access records were imported', 'warning')
+                
+        except Exception as e:
+            flash(f'Error processing file: {str(e)}', 'error')
+    
+    return render_template('bulk_upload_github_access.html')
+
+
+@access_bp.route('/github/download-sample-csv')
+@login_required
+def download_sample_github_access_csv():
+    """
+    Download sample CSV file for GitHub access bulk upload.
+    
+    Returns:
+        CSV file download with sample data
+    """
+    try:
+        # Generate sample CSV
+        csv_data = GitHubAccessCSVService.generate_sample_csv()
+        
+        # Create response
+        response = Response(
+            csv_data.getvalue(),
+            mimetype='text/csv',
+            headers={
+                'Content-Disposition': 'attachment; filename=github_access_sample_template.csv'
+            }
+        )
+        
+        return response
+        
+    except Exception as e:
+        flash(f'Error generating sample CSV: {str(e)}', 'error')
+        return redirect(url_for('access.list_github_access'))

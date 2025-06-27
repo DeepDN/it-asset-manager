@@ -8,7 +8,7 @@
             <p class="text-muted mb-0">Register new equipment with comprehensive details</p>
         </div>
         <div>
-            <a href="{{ url_for('assets') }}" class="btn btn-outline-secondary">
+            <a href="{{ url_for('assets.list_assets') }}" class="btn btn-outline-secondary">
                 <i class="fas fa-arrow-left me-2"></i>Back to Assets
             </a>
         </div>
@@ -344,7 +344,7 @@
             <div class="card">
                 <div class="card-body">
                     <div class="d-grid gap-2 d-md-flex justify-content-md-end">
-                        <a href="{{ url_for('assets') }}" class="btn btn-secondary me-md-2">Cancel</a>
+                        <a href="{{ url_for('assets.list_assets') }}" class="btn btn-secondary me-md-2">Cancel</a>
                         <button type="submit" class="btn btn-primary">
                             <i class="fas fa-save me-2"></i>Save Asset
                         </button>

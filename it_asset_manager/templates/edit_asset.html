@@ -4,7 +4,7 @@
 <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
     <h1 class="h2"><i class="fas fa-edit"></i> Edit Asset</h1>
     <div class="btn-toolbar mb-2 mb-md-0">
-        <a href="{{ url_for('assets') }}" class="btn btn-outline-secondary">
+        <a href="{{ url_for('assets.list_assets') }}" class="btn btn-outline-secondary">
             <i class="fas fa-arrow-left"></i> Back to Assets
         </a>
     </div>
@@ -94,7 +94,7 @@
                     </div>
 
                     <div class="d-grid gap-2 d-md-flex justify-content-md-end">
-                        <a href="{{ url_for('assets') }}" class="btn btn-secondary me-md-2">Cancel</a>
+                        <a href="{{ url_for('assets.list_assets') }}" class="btn btn-secondary me-md-2">Cancel</a>
                         <button type="submit" class="btn btn-primary">
                             <i class="fas fa-save"></i> Update Asset
                         </button>
