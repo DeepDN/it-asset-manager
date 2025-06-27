@@ -1,0 +1,64 @@
+name: Docker Security Scan
+
+on:
+  schedule:
+    - cron: '0 2 * * 1'  # Weekly on Monday at 2 AM
+  push:
+    branches: [ main ]
+    paths:
+      - 'Dockerfile'
+      - 'requirements*.txt'
+  workflow_dispatch:
+
+jobs:
+  docker-security-scan:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Build Docker image for scanning
+      run: |
+        docker build -t it-asset-manager:scan .
+
+    - name: Run Trivy vulnerability scanner on Docker image
+      uses: aquasecurity/trivy-action@master
+      with:
+        image-ref: 'it-asset-manager:scan'
+        format: 'sarif'
+        output: 'docker-trivy-results.sarif'
+
+    - name: Upload Trivy scan results to GitHub Security tab
+      uses: github/codeql-action/upload-sarif@v2
+      with:
+        sarif_file: 'docker-trivy-results.sarif'
+
+    - name: Run Docker Bench Security
+      run: |
+        docker run --rm --net host --pid host --userns host --cap-add audit_control \
+          -e DOCKER_CONTENT_TRUST=$DOCKER_CONTENT_TRUST \
+          -v /etc:/etc:ro \
+          -v /usr/bin/containerd:/usr/bin/containerd:ro \
+          -v /usr/bin/runc:/usr/bin/runc:ro \
+          -v /usr/lib/systemd:/usr/lib/systemd:ro \
+          -v /var/lib:/var/lib:ro \
+          -v /var/run/docker.sock:/var/run/docker.sock:ro \
+          --label docker_bench_security \
+          docker/docker-bench-security > docker-bench-results.txt || true
+
+    - name: Upload Docker Bench results
+      uses: actions/upload-artifact@v3
+      with:
+        name: docker-security-results
+        path: |
+          docker-trivy-results.sarif
+          docker-bench-results.txt
+
+    - name: Check for critical vulnerabilities
+      run: |
+        # Parse Trivy results and fail if critical vulnerabilities found
+        if grep -q '"level": "CRITICAL"' docker-trivy-results.sarif; then
+          echo "Critical vulnerabilities found in Docker image!"
+          exit 1
+        fi

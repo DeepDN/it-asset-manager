@@ -1,0 +1,128 @@
+name: Dependency Updates
+
+on:
+  schedule:
+    - cron: '0 3 * * 1'  # Weekly on Monday at 3 AM
+  workflow_dispatch:
+
+jobs:
+  update-dependencies:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      with:
+        token: ${{ secrets.GITHUB_TOKEN }}
+
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.11'
+
+    - name: Install pip-tools
+      run: |
+        python -m pip install --upgrade pip
+        pip install pip-tools
+
+    - name: Update requirements
+      run: |
+        # Update main requirements
+        pip-compile --upgrade requirements.in
+        
+        # Update Docker requirements
+        pip-compile --upgrade requirements-docker.in
+
+    - name: Check for security vulnerabilities
+      run: |
+        pip install safety
+        safety check -r requirements.txt
+        safety check -r requirements-docker.txt
+
+    - name: Create Pull Request
+      uses: peter-evans/create-pull-request@v5
+      with:
+        token: ${{ secrets.GITHUB_TOKEN }}
+        commit-message: 'chore: update Python dependencies'
+        title: 'chore: update Python dependencies'
+        body: |
+          ## Dependency Updates
+          
+          This PR updates Python dependencies to their latest versions.
+          
+          ### Changes
+          - Updated requirements.txt
+          - Updated requirements-docker.txt
+          
+          ### Security
+          - All dependencies have been checked for security vulnerabilities
+          
+          Please review the changes and test thoroughly before merging.
+        branch: dependency-updates
+        delete-branch: true
+
+  update-docker-images:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      with:
+        token: ${{ secrets.GITHUB_TOKEN }}
+
+    - name: Check for Docker base image updates
+      run: |
+        # Check Python base image
+        CURRENT_PYTHON=$(grep "FROM python:" Dockerfile | head -1 | cut -d: -f2 | cut -d- -f1)
+        LATEST_PYTHON=$(curl -s https://registry.hub.docker.com/v2/repositories/library/python/tags/ | jq -r '.results[].name' | grep -E '^3\.[0-9]+-slim$' | sort -V | tail -1 | cut -d- -f1)
+        
+        # Check PostgreSQL image
+        CURRENT_POSTGRES=$(grep "postgres:" docker-compose.prod.yml | head -1 | cut -d: -f3)
+        LATEST_POSTGRES=$(curl -s https://registry.hub.docker.com/v2/repositories/library/postgres/tags/ | jq -r '.results[].name' | grep -E '^[0-9]+-alpine$' | sort -V | tail -1)
+        
+        # Check Redis image
+        CURRENT_REDIS=$(grep "redis:" docker-compose.prod.yml | head -1 | cut -d: -f3)
+        LATEST_REDIS=$(curl -s https://registry.hub.docker.com/v2/repositories/library/redis/tags/ | jq -r '.results[].name' | grep -E '^[0-9]+-alpine$' | sort -V | tail -1)
+        
+        echo "Current Python: $CURRENT_PYTHON, Latest: $LATEST_PYTHON"
+        echo "Current PostgreSQL: $CURRENT_POSTGRES, Latest: $LATEST_POSTGRES"
+        echo "Current Redis: $CURRENT_REDIS, Latest: $LATEST_REDIS"
+        
+        # Update Dockerfile if needed
+        if [ "$CURRENT_PYTHON" != "$LATEST_PYTHON" ]; then
+          sed -i "s/python:$CURRENT_PYTHON-slim/python:$LATEST_PYTHON-slim/g" Dockerfile
+          echo "PYTHON_UPDATED=true" >> $GITHUB_ENV
+        fi
+        
+        # Update docker-compose files if needed
+        if [ "$CURRENT_POSTGRES" != "$LATEST_POSTGRES" ]; then
+          sed -i "s/postgres:$CURRENT_POSTGRES/postgres:$LATEST_POSTGRES/g" docker-compose*.yml
+          echo "POSTGRES_UPDATED=true" >> $GITHUB_ENV
+        fi
+        
+        if [ "$CURRENT_REDIS" != "$LATEST_REDIS" ]; then
+          sed -i "s/redis:$CURRENT_REDIS/redis:$LATEST_REDIS/g" docker-compose*.yml
+          echo "REDIS_UPDATED=true" >> $GITHUB_ENV
+        fi
+
+    - name: Create Pull Request for Docker updates
+      if: env.PYTHON_UPDATED == 'true' || env.POSTGRES_UPDATED == 'true' || env.REDIS_UPDATED == 'true'
+      uses: peter-evans/create-pull-request@v5
+      with:
+        token: ${{ secrets.GITHUB_TOKEN }}
+        commit-message: 'chore: update Docker base images'
+        title: 'chore: update Docker base images'
+        body: |
+          ## Docker Base Image Updates
+          
+          This PR updates Docker base images to their latest versions.
+          
+          ### Changes
+          ${{ env.PYTHON_UPDATED == 'true' && '- Updated Python base image' || '' }}
+          ${{ env.POSTGRES_UPDATED == 'true' && '- Updated PostgreSQL image' || '' }}
+          ${{ env.REDIS_UPDATED == 'true' && '- Updated Redis image' || '' }}
+          
+          ### Testing
+          Please ensure all tests pass and the application works correctly with the updated images.
+        branch: docker-image-updates
+        delete-branch: true

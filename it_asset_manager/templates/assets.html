@@ -1,0 +1,325 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="page-header">
+    <div class="d-flex justify-content-between align-items-center">
+        <div>
+            <h1 class="mb-2"><i class="fas fa-laptop me-3"></i>IT Assets</h1>
+            <p class="text-muted mb-0">Manage and track all your IT equipment and devices</p>
+        </div>
+        <div>
+            <a href="{{ url_for('add_asset') }}" class="btn btn-primary">
+                <i class="fas fa-plus me-2"></i>Add New Asset
+            </a>
+        </div>
+    </div>
+</div>
+
+<!-- Advanced Filters -->
+<div class="card mb-4">
+    <div class="card-header">
+        <h6 class="card-title mb-0">
+            <i class="fas fa-filter text-primary me-2"></i>Advanced Filters
+        </h6>
+    </div>
+    <div class="card-body">
+        <form method="GET" class="row g-3">
+            <div class="col-md-3">
+                <label for="asset_type" class="form-label">Asset Type</label>
+                <select class="form-select" id="asset_type" name="asset_type">
+                    <option value="">All Types</option>
+                    {% for type in asset_types %}
+                        <option value="{{ type[0] }}" {% if request.args.get('asset_type') == type[0] %}selected{% endif %}>
+                            {{ type[0].title() }}
+                        </option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-md-3">
+                <label for="assigned_user" class="form-label">Assigned User</label>
+                <input type="text" class="form-control" id="assigned_user" name="assigned_user" 
+                       value="{{ request.args.get('assigned_user', '') }}" placeholder="Search user...">
+            </div>
+            <div class="col-md-3">
+                <label for="status" class="form-label">Status</label>
+                <select class="form-select" id="status" name="status">
+                    <option value="">All Status</option>
+                    <option value="assigned" {% if request.args.get('status') == 'assigned' %}selected{% endif %}>Assigned</option>
+                    <option value="unassigned" {% if request.args.get('status') == 'unassigned' %}selected{% endif %}>Available</option>
+                </select>
+            </div>
+            <div class="col-md-3">
+                <label class="form-label">&nbsp;</label>
+                <div class="d-grid">
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-search me-2"></i>Apply Filters
+                    </button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Assets Overview Cards -->
+<div class="row mb-4">
+    <div class="col-md-4">
+        <div class="card text-center">
+            <div class="card-body">
+                <i class="fas fa-laptop fa-2x text-primary mb-3"></i>
+                <h5>{{ assets|length }}</h5>
+                <small class="text-muted">Assets Displayed</small>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card text-center">
+            <div class="card-body">
+                <i class="fas fa-user-check fa-2x text-success mb-3"></i>
+                <h5>{{ assets|selectattr("status", "equalto", "assigned")|list|length }}</h5>
+                <small class="text-muted">Currently Assigned</small>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card text-center">
+            <div class="card-body">
+                <i class="fas fa-box fa-2x text-warning mb-3"></i>
+                <h5>{{ assets|selectattr("status", "equalto", "unassigned")|list|length }}</h5>
+                <small class="text-muted">Available</small>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Assets Table -->
+<div class="card">
+    <div class="card-header">
+        <h6 class="card-title mb-0">
+            <i class="fas fa-list text-primary me-2"></i>Assets Inventory
+        </h6>
+    </div>
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-hover mb-0">
+                <thead>
+                    <tr>
+                        <th>Asset Details</th>
+                        <th>Ownership</th>
+                        <th>Specifications</th>
+                        <th>Assignment</th>
+                        <th>Status</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for asset in assets %}
+                    <tr>
+                        <td>
+                            <div class="d-flex align-items-center">
+                                <div class="me-3">
+                                    <div class="icon-shape bg-light">
+                                        <i class="fas fa-{% if asset.asset_type == 'laptop' %}laptop{% elif asset.asset_type == 'desktop' %}desktop{% elif asset.asset_type in ['mobile', 'iphone'] %}mobile-alt{% elif asset.asset_type in ['tablet', 'ipad'] %}tablet-alt{% elif asset.asset_type in ['router', 'switch', 'firewall'] %}network-wired{% elif asset.asset_type == 'monitor' %}desktop{% elif asset.asset_type == 'printer' %}print{% else %}cube{% endif %} text-primary"></i>
+                                    </div>
+                                </div>
+                                <div>
+                                    <h6 class="mb-1">
+                                        <span class="badge bg-primary me-2">{{ asset.asset_tag or 'N/A' }}</span>
+                                        {{ asset.asset_type.title() }}
+                                    </h6>
+                                    <p class="mb-1"><strong>{{ asset.brand or 'N/A' }}</strong> {{ asset.model or '' }}</p>
+                                    <small class="text-muted">
+                                        <i class="fas fa-barcode me-1"></i>{{ asset.serial_number }}
+                                        {% if asset.asset_category %}
+                                        <br><i class="fas fa-tag me-1"></i>{{ asset.asset_category }}
+                                        {% endif %}
+                                    </small>
+                                </div>
+                            </div>
+                        </td>
+                        <td>
+                            <div class="small">
+                                {% if asset.ownership_type == 'purchased' %}
+                                    <span class="badge bg-success mb-1">Purchased</span>
+                                    {% if asset.purchase_date %}
+                                        <div><i class="fas fa-calendar me-1"></i>{{ asset.purchase_date.strftime('%Y-%m-%d') }}</div>
+                                    {% endif %}
+                                    {% if asset.purchase_cost %}
+                                        <div><i class="fas fa-dollar-sign me-1"></i>${{ "%.2f"|format(asset.purchase_cost) }}</div>
+                                    {% endif %}
+                                {% elif asset.ownership_type == 'rented' %}
+                                    <span class="badge bg-warning mb-1">Rented</span>
+                                    {% if asset.vendor_name %}
+                                        <div><i class="fas fa-building me-1"></i>{{ asset.vendor_name }}</div>
+                                    {% endif %}
+                                    {% if asset.rental_cost_monthly %}
+                                        <div><i class="fas fa-dollar-sign me-1"></i>${{ "%.2f"|format(asset.rental_cost_monthly) }}/mo</div>
+                                    {% endif %}
+                                {% elif asset.ownership_type == 'leased' %}
+                                    <span class="badge bg-info mb-1">Leased</span>
+                                    {% if asset.vendor_name %}
+                                        <div><i class="fas fa-building me-1"></i>{{ asset.vendor_name }}</div>
+                                    {% endif %}
+                                {% endif %}
+                            </div>
+                        </td>
+                        <td>
+                            <div class="small">
+                                {% if asset.processor %}
+                                    <div class="mb-1">
+                                        <i class="fas fa-microchip text-info me-1"></i>
+                                        <strong>CPU:</strong> {{ asset.processor }}
+                                    </div>
+                                {% endif %}
+                                {% if asset.ram_gb %}
+                                    <div class="mb-1">
+                                        <i class="fas fa-memory text-success me-1"></i>
+                                        <strong>RAM:</strong> {{ asset.ram_gb }}GB
+                                    </div>
+                                {% endif %}
+                                {% if asset.storage_gb %}
+                                    <div class="mb-1">
+                                        <i class="fas fa-hdd text-warning me-1"></i>
+                                        <strong>Storage:</strong> {{ asset.storage_gb }}GB {{ asset.storage_type or '' }}
+                                    </div>
+                                {% endif %}
+                                {% if asset.port_count %}
+                                    <div class="mb-1">
+                                        <i class="fas fa-ethernet text-primary me-1"></i>
+                                        <strong>Ports:</strong> {{ asset.port_count }}
+                                    </div>
+                                {% endif %}
+                                {% if asset.screen_size %}
+                                    <div class="mb-1">
+                                        <i class="fas fa-tv text-secondary me-1"></i>
+                                        <strong>Size:</strong> {{ asset.screen_size }}
+                                    </div>
+                                {% endif %}
+                                {% if asset.resolution %}
+                                    <div class="mb-1">
+                                        <i class="fas fa-expand text-info me-1"></i>
+                                        <strong>Resolution:</strong> {{ asset.resolution }}
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </td>
+                        <td>
+                            {% if asset.assigned_to %}
+                                <div class="d-flex align-items-center">
+                                    <i class="fas fa-user text-success me-2"></i>
+                                    <div>
+                                        <div class="fw-bold">{{ asset.assigned_to }}</div>
+                                        {% if asset.assign_date %}
+                                            <small class="text-muted">Since: {{ asset.assign_date.strftime('%Y-%m-%d') }}</small>
+                                        {% endif %}
+                                        {% if asset.location %}
+                                            <br><small class="text-muted"><i class="fas fa-map-marker-alt me-1"></i>{{ asset.location }}</small>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            {% else %}
+                                <div class="text-muted">
+                                    <i class="fas fa-minus-circle me-2"></i>Unassigned
+                                    {% if asset.location %}
+                                        <br><small><i class="fas fa-map-marker-alt me-1"></i>{{ asset.location }}</small>
+                                    {% endif %}
+                                </div>
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if asset.status == 'assigned' %}
+                                <span class="badge bg-success">
+                                    <i class="fas fa-check me-1"></i>Assigned
+                                </span>
+                            {% elif asset.status == 'maintenance' %}
+                                <span class="badge bg-warning">
+                                    <i class="fas fa-wrench me-1"></i>Maintenance
+                                </span>
+                            {% elif asset.status == 'retired' %}
+                                <span class="badge bg-secondary">
+                                    <i class="fas fa-archive me-1"></i>Retired
+                                </span>
+                            {% else %}
+                                <span class="badge bg-info">
+                                    <i class="fas fa-clock me-1"></i>Available
+                                </span>
+                            {% endif %}
+                            
+                            {% if asset.condition %}
+                                <br><small class="badge bg-{% if asset.condition == 'excellent' %}success{% elif asset.condition == 'good' %}primary{% elif asset.condition == 'fair' %}warning{% else %}danger{% endif %} mt-1">
+                                    {{ asset.condition.title() }}
+                                </small>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <div class="btn-group" role="group">
+                                <a href="{{ url_for('edit_asset', id=asset.id) }}" class="btn btn-sm btn-outline-primary" title="Edit Asset">
+                                    <i class="fas fa-edit"></i>
+                                </a>
+                                <button class="btn btn-sm btn-outline-info" title="View Details" onclick="showAssetDetails({{ asset.id }})">
+                                    <i class="fas fa-eye"></i>
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td colspan="6" class="text-center py-5">
+                            <div class="text-muted">
+                                <i class="fas fa-inbox fa-3x mb-3"></i>
+                                <h5>No assets found</h5>
+                                <p>Try adjusting your filters or <a href="{{ url_for('add_asset') }}">add a new asset</a></p>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- Asset Details Modal -->
+<div class="modal fade" id="assetDetailsModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">
+                    <i class="fas fa-info-circle me-2"></i>Asset Details
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body" id="assetDetailsContent">
+                <!-- Content will be loaded here -->
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+function showAssetDetails(assetId) {
+    // This would typically fetch asset details via AJAX
+    // For now, we'll show a placeholder
+    document.getElementById('assetDetailsContent').innerHTML = `
+        <div class="text-center">
+            <i class="fas fa-spinner fa-spin fa-2x mb-3"></i>
+            <p>Loading asset details...</p>
+        </div>
+    `;
+    
+    var modal = new bootstrap.Modal(document.getElementById('assetDetailsModal'));
+    modal.show();
+    
+    // Simulate loading
+    setTimeout(() => {
+        document.getElementById('assetDetailsContent').innerHTML = `
+            <div class="alert alert-info">
+                <i class="fas fa-info-circle me-2"></i>
+                Detailed asset view would be implemented here with full specifications, history, and maintenance records.
+            </div>
+        `;
+    }, 1000);
+}
+</script>
+{% endblock %}

@@ -1,0 +1,121 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+    <h1 class="h2"><i class="fas fa-users-cog"></i> Application Access</h1>
+    <div class="btn-toolbar mb-2 mb-md-0">
+        <a href="{{ url_for('add_app_access') }}" class="btn btn-primary">
+            <i class="fas fa-plus"></i> Add Access
+        </a>
+    </div>
+</div>
+
+<!-- Filters -->
+<div class="card mb-4">
+    <div class="card-body">
+        <form method="GET" class="row g-3">
+            <div class="col-md-3">
+                <label for="user_name" class="form-label">User Name</label>
+                <input type="text" class="form-control" id="user_name" name="user_name" 
+                       value="{{ request.args.get('user_name', '') }}" placeholder="Search user...">
+            </div>
+            <div class="col-md-3">
+                <label for="application" class="form-label">Application</label>
+                <select class="form-select" id="application" name="application">
+                    <option value="">All Applications</option>
+                    {% for app in applications %}
+                        <option value="{{ app[0] }}" {% if request.args.get('application') == app[0] %}selected{% endif %}>
+                            {{ app[0] }}
+                        </option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-md-3">
+                <label for="status" class="form-label">Status</label>
+                <select class="form-select" id="status" name="status">
+                    <option value="">All Status</option>
+                    <option value="active" {% if request.args.get('status') == 'active' %}selected{% endif %}>Active</option>
+                    <option value="revoked" {% if request.args.get('status') == 'revoked' %}selected{% endif %}>Revoked</option>
+                </select>
+            </div>
+            <div class="col-md-3">
+                <label class="form-label">&nbsp;</label>
+                <div class="d-grid">
+                    <button type="submit" class="btn btn-outline-primary">
+                        <i class="fas fa-search"></i> Filter
+                    </button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Access Table -->
+<div class="card">
+    <div class="card-body">
+        <div class="table-responsive">
+            <table class="table table-striped table-hover">
+                <thead class="table-dark">
+                    <tr>
+                        <th>User Name</th>
+                        <th>Application</th>
+                        <th>Access Level</th>
+                        <th>Assign Date</th>
+                        <th>Remove Date</th>
+                        <th>Status</th>
+                        <th>Remarks</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for access in accesses %}
+                    <tr>
+                        <td>
+                            <i class="fas fa-user"></i>
+                            <strong>{{ access.user_name }}</strong>
+                        </td>
+                        <td>
+                            <span class="badge bg-info">{{ access.application_name }}</span>
+                        </td>
+                        <td>
+                            {% if access.access_level == 'Admin' %}
+                                <span class="badge bg-danger">{{ access.access_level }}</span>
+                            {% elif access.access_level == 'Write' %}
+                                <span class="badge bg-warning">{{ access.access_level }}</span>
+                            {% else %}
+                                <span class="badge bg-success">{{ access.access_level }}</span>
+                            {% endif %}
+                        </td>
+                        <td>{{ access.assign_date.strftime('%Y-%m-%d') }}</td>
+                        <td>
+                            {% if access.remove_date %}
+                                {{ access.remove_date.strftime('%Y-%m-%d') }}
+                            {% else %}
+                                <span class="text-muted">-</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if access.status == 'active' %}
+                                <span class="badge bg-success">Active</span>
+                            {% else %}
+                                <span class="badge bg-secondary">Revoked</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if access.remarks %}
+                                <small>{{ access.remarks[:50] }}{% if access.remarks|length > 50 %}...{% endif %}</small>
+                            {% else %}
+                                <span class="text-muted">-</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td colspan="7" class="text-center text-muted">No application access records found</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

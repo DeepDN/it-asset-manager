@@ -1,0 +1,148 @@
+version: '3.8'
+
+# Docker Compose configuration for testing
+# This extends the base docker-compose.yml for testing scenarios
+
+services:
+  # Test application with coverage
+  app-test:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: development
+    container_name: it-asset-manager-test
+    environment:
+      - FLASK_ENV=testing
+      - SECRET_KEY=test-secret-key
+      - DATABASE_URL=postgresql://test_user:test_password@postgres-test:5432/test_db
+      - REDIS_URL=redis://redis-test:6379/0
+      - COVERAGE_PROCESS_START=.coveragerc
+    volumes:
+      - .:/app
+      - test_coverage:/app/htmlcov
+    depends_on:
+      postgres-test:
+        condition: service_healthy
+      redis-test:
+        condition: service_healthy
+    networks:
+      - test-network
+    command: >
+      sh -c "
+        echo 'Waiting for database...' &&
+        python -c 'from it_asset_manager.core.database import db; from it_asset_manager.core.app import create_app; app = create_app(\"testing\"); app.app_context().push(); db.create_all(); print(\"Database ready\")' &&
+        echo 'Running tests with coverage...' &&
+        pytest tests/ -v --cov=it_asset_manager --cov-report=html --cov-report=term-missing --cov-fail-under=80
+      "
+
+  # Test PostgreSQL database
+  postgres-test:
+    image: postgres:15-alpine
+    container_name: it-asset-manager-postgres-test
+    environment:
+      - POSTGRES_DB=test_db
+      - POSTGRES_USER=test_user
+      - POSTGRES_PASSWORD=test_password
+    volumes:
+      - postgres_test_data:/var/lib/postgresql/data
+      - ./docker/postgres/init.sql:/docker-entrypoint-initdb.d/init.sql
+    networks:
+      - test-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U test_user -d test_db"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Test Redis
+  redis-test:
+    image: redis:7-alpine
+    container_name: it-asset-manager-redis-test
+    networks:
+      - test-network
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Selenium for browser testing
+  selenium:
+    image: selenium/standalone-chrome:latest
+    container_name: it-asset-manager-selenium
+    ports:
+      - "4444:4444"
+    networks:
+      - test-network
+    shm_size: 2gb
+    environment:
+      - SE_OPTS=--disable-dev-shm-usage
+
+  # Load testing with k6
+  k6:
+    image: grafana/k6:latest
+    container_name: it-asset-manager-k6
+    volumes:
+      - ./tests/performance:/scripts
+      - k6_results:/results
+    networks:
+      - test-network
+    environment:
+      - BASE_URL=http://app-dev:5000
+    command: run --out json=/results/results.json /scripts/load-test.js
+    depends_on:
+      - app-dev
+
+  # Test database migration
+  migration-test:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: development
+    container_name: it-asset-manager-migration-test
+    environment:
+      - FLASK_ENV=testing
+      - DATABASE_URL=postgresql://test_user:test_password@postgres-test:5432/test_db
+    volumes:
+      - .:/app
+    depends_on:
+      postgres-test:
+        condition: service_healthy
+    networks:
+      - test-network
+    command: >
+      sh -c "
+        echo 'Testing database migrations...' &&
+        python -c 'from it_asset_manager.core.database import db; from it_asset_manager.core.app import create_app; app = create_app(\"testing\"); app.app_context().push(); db.create_all(); print(\"Migration test completed\")'
+      "
+
+  # Security testing with OWASP ZAP
+  zap:
+    image: owasp/zap2docker-stable
+    container_name: it-asset-manager-zap
+    volumes:
+      - zap_results:/zap/wrk
+    networks:
+      - test-network
+    command: >
+      sh -c "
+        echo 'Starting security scan...' &&
+        zap-baseline.py -t http://app-dev:5000 -J zap-report.json -r zap-report.html || true &&
+        echo 'Security scan completed'
+      "
+    depends_on:
+      - app-dev
+
+volumes:
+  postgres_test_data:
+    driver: local
+  test_coverage:
+    driver: local
+  k6_results:
+    driver: local
+  zap_results:
+    driver: local
+
+networks:
+  test-network:
+    driver: bridge

@@ -1,0 +1,191 @@
+# IT Asset Manager - .gitignore
+# Created by Deepak Nemade
+# LinkedIn: https://www.linkedin.com/in/deepak-nemade/
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+pip-wheel-metadata/
+share/python-wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+
+# Virtual Environment
+venv/
+env/
+ENV/
+env.bak/
+venv.bak/
+
+# Flask
+instance/
+.webassets-cache
+
+# Database
+*.db
+*.sqlite
+*.sqlite3
+
+# Logs
+*.log
+logs/
+app.log
+
+# Environment Variables
+.env
+.env.*
+!.env.example
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Backup files
+backups/*.db
+backups/*.csv
+backups/*.tar.gz
+backups/*.sql
+backups/*.dump
+*.backup
+
+# Temporary files
+tmp/
+temp/
+*.tmp
+
+# Coverage reports
+htmlcov/
+.tox/
+.coverage
+.coverage.*
+.cache
+nosetests.xml
+coverage.xml
+*.cover
+*.py,cover
+.hypothesis/
+.pytest_cache/
+
+# Jupyter Notebook
+.ipynb_checkpoints
+
+# pyenv
+.python-version
+
+# pipenv
+Pipfile.lock
+
+# PEP 582
+__pypackages__/
+
+# Celery
+celerybeat-schedule
+celerybeat.pid
+
+# SageMath parsed files
+*.sage.py
+
+# Spyder project settings
+.spyderproject
+.spyproject
+
+# Rope project settings
+.ropeproject
+
+# mkdocs documentation
+/site
+
+# mypy
+.mypy_cache/
+.dmypy.json
+dmypy.json
+
+# Pyre type checker
+.pyre/
+
+# Custom application files
+uploads/
+downloads/
+exports/
+
+# Configuration files with sensitive data
+config.py
+settings.py
+
+# SSL certificates
+*.pem
+*.key
+*.crt
+*.csr
+docker/nginx/ssl/
+
+# Docker
+docker-compose.override.yml
+
+# Node modules (if any frontend tools are added)
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Production builds
+build/
+dist/
+
+# Monitoring data
+prometheus_data/
+grafana_data/
+
+# Performance test results
+performance-results.json
+k6-results/
+
+# Security scan results
+trivy-results.sarif
+bandit-report.json
+docker-bench-results.txt
+
+# Keep important files
+!requirements.txt
+!setup.sh
+!backup.sh
+!migrate_*.py
+!add_sample_data.py
+!update_password.py
+!README.md
+!LICENSE
+!CHANGELOG.md
+!INSTALLATION.md

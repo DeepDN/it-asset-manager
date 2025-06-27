@@ -1,0 +1,451 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="page-header">
+    <div class="d-flex justify-content-between align-items-center">
+        <div>
+            <h1 class="mb-2"><i class="fas fa-plus me-3"></i>Add New Asset</h1>
+            <p class="text-muted mb-0">Register new equipment with comprehensive details</p>
+        </div>
+        <div>
+            <a href="{{ url_for('assets') }}" class="btn btn-outline-secondary">
+                <i class="fas fa-arrow-left me-2"></i>Back to Assets
+            </a>
+        </div>
+    </div>
+</div>
+
+<form method="POST">
+    <div class="row">
+        <!-- Left Column -->
+        <div class="col-lg-8">
+            <!-- Basic Information -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-info-circle text-primary me-2"></i>Basic Information
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="asset_tag" class="form-label">Asset Tag *</label>
+                            <input type="text" class="form-control" id="asset_tag" name="asset_tag" required 
+                                   placeholder="e.g., LAP0001, DSK0002" pattern="[A-Z]{3}[0-9]{4}">
+                            <div class="form-text">Format: 3 letters + 4 numbers (e.g., LAP0001)</div>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="asset_type" class="form-label">Asset Type *</label>
+                            <select class="form-select" id="asset_type" name="asset_type" required onchange="updateAssetCategory()">
+                                <option value="">Select Asset Type</option>
+                                <optgroup label="Computing Devices">
+                                    <option value="laptop">Laptop</option>
+                                    <option value="desktop">Desktop</option>
+                                    <option value="cpu">CPU/Tower</option>
+                                </optgroup>
+                                <optgroup label="Mobile Devices">
+                                    <option value="mobile">Mobile Phone</option>
+                                    <option value="tablet">Tablet</option>
+                                    <option value="ipad">iPad</option>
+                                    <option value="iphone">iPhone</option>
+                                </optgroup>
+                                <optgroup label="Storage Devices">
+                                    <option value="pendrive">Pen Drive/USB</option>
+                                    <option value="harddisk">External Hard Disk</option>
+                                    <option value="ssd">External SSD</option>
+                                </optgroup>
+                                <optgroup label="Peripherals">
+                                    <option value="keyboard">Keyboard</option>
+                                    <option value="mouse">Mouse</option>
+                                </optgroup>
+                                <optgroup label="Display Devices">
+                                    <option value="monitor">Monitor</option>
+                                    <option value="television">Television</option>
+                                    <option value="projector">Projector</option>
+                                </optgroup>
+                                <optgroup label="Network Devices">
+                                    <option value="router">Router</option>
+                                    <option value="switch">Switch</option>
+                                    <option value="firewall">Firewall</option>
+                                    <option value="loadbalancer">Load Balancer</option>
+                                </optgroup>
+                                <optgroup label="Office Equipment">
+                                    <option value="printer">Printer</option>
+                                    <option value="extension">Extension Board</option>
+                                </optgroup>
+                                <optgroup label="Audio/Video">
+                                    <option value="speaker">Speaker</option>
+                                    <option value="microphone">Microphone</option>
+                                    <option value="podcast">Podcast Equipment</option>
+                                </optgroup>
+                                <optgroup label="Connectors">
+                                    <option value="hdmi">HDMI Cable</option>
+                                    <option value="usbc">USB-C Cable</option>
+                                    <option value="lightning">Lightning Cable</option>
+                                    <option value="ethernet">Ethernet Cable</option>
+                                </optgroup>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="asset_category" class="form-label">Asset Category</label>
+                            <input type="text" class="form-control" id="asset_category" name="asset_category" readonly>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="serial_number" class="form-label">Serial Number *</label>
+                            <input type="text" class="form-control" id="serial_number" name="serial_number" required 
+                                   placeholder="Unique serial number">
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="brand" class="form-label">Brand</label>
+                            <input type="text" class="form-control" id="brand" name="brand" 
+                                   placeholder="e.g., Dell, HP, Apple, Cisco">
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="model" class="form-label">Model</label>
+                            <input type="text" class="form-control" id="model" name="model" 
+                                   placeholder="e.g., Latitude 5520, iPhone 14">
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Ownership Information -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-building text-success me-2"></i>Ownership & Financial
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-4 mb-3">
+                            <label for="ownership_type" class="form-label">Ownership Type *</label>
+                            <select class="form-select" id="ownership_type" name="ownership_type" required onchange="toggleOwnershipFields()">
+                                <option value="purchased">Purchased</option>
+                                <option value="rented">Rented</option>
+                                <option value="leased">Leased</option>
+                            </select>
+                        </div>
+                        <div class="col-md-4 mb-3" id="purchase_date_field">
+                            <label for="purchase_date" class="form-label">Purchase Date</label>
+                            <input type="date" class="form-control" id="purchase_date" name="purchase_date">
+                        </div>
+                        <div class="col-md-4 mb-3" id="purchase_cost_field">
+                            <label for="purchase_cost" class="form-label">Purchase Cost</label>
+                            <input type="number" class="form-control" id="purchase_cost" name="purchase_cost" 
+                                   step="0.01" placeholder="0.00">
+                        </div>
+                    </div>
+
+                    <!-- Rental/Lease Fields (Hidden by default) -->
+                    <div id="rental_fields" style="display: none;">
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="vendor_name" class="form-label">Vendor Name</label>
+                                <input type="text" class="form-control" id="vendor_name" name="vendor_name" 
+                                       placeholder="Rental/Lease vendor">
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="rental_cost_monthly" class="form-label">Monthly Cost</label>
+                                <input type="number" class="form-control" id="rental_cost_monthly" name="rental_cost_monthly" 
+                                       step="0.01" placeholder="0.00">
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="rental_start_date" class="form-label">Start Date</label>
+                                <input type="date" class="form-control" id="rental_start_date" name="rental_start_date">
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="rental_end_date" class="form-label">End Date</label>
+                                <input type="date" class="form-control" id="rental_end_date" name="rental_end_date">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="warranty_expiry" class="form-label">Warranty Expiry</label>
+                            <input type="date" class="form-control" id="warranty_expiry" name="warranty_expiry">
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="condition" class="form-label">Condition</label>
+                            <select class="form-select" id="condition" name="condition">
+                                <option value="excellent">Excellent</option>
+                                <option value="good" selected>Good</option>
+                                <option value="fair">Fair</option>
+                                <option value="poor">Poor</option>
+                                <option value="damaged">Damaged</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Right Column -->
+        <div class="col-lg-4">
+            <!-- Technical Specifications -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h6 class="card-title mb-0">
+                        <i class="fas fa-cog text-info me-2"></i>Technical Specifications
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <!-- Computing Specs -->
+                    <div id="computing_specs">
+                        <div class="mb-3">
+                            <label for="processor" class="form-label">Processor</label>
+                            <input type="text" class="form-control" id="processor" name="processor" 
+                                   placeholder="e.g., Intel i7-11800H">
+                        </div>
+                        <div class="mb-3">
+                            <label for="ram_gb" class="form-label">RAM (GB)</label>
+                            <input type="number" class="form-control" id="ram_gb" name="ram_gb" placeholder="8">
+                        </div>
+                        <div class="mb-3">
+                            <label for="storage_gb" class="form-label">Storage (GB)</label>
+                            <input type="number" class="form-control" id="storage_gb" name="storage_gb" placeholder="512">
+                        </div>
+                        <div class="mb-3">
+                            <label for="storage_type" class="form-label">Storage Type</label>
+                            <select class="form-select" id="storage_type" name="storage_type">
+                                <option value="">Select Type</option>
+                                <option value="SSD">SSD</option>
+                                <option value="HDD">HDD</option>
+                                <option value="Hybrid">Hybrid</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- Network Specs -->
+                    <div id="network_specs" style="display: none;">
+                        <div class="mb-3">
+                            <label for="port_count" class="form-label">Port Count</label>
+                            <input type="number" class="form-control" id="port_count" name="port_count" 
+                                   placeholder="e.g., 24, 48">
+                        </div>
+                        <div class="mb-3">
+                            <label for="network_type" class="form-label">Network Type</label>
+                            <select class="form-select" id="network_type" name="network_type">
+                                <option value="">Select Type</option>
+                                <option value="Ethernet">Ethernet</option>
+                                <option value="WiFi">WiFi</option>
+                                <option value="Fiber">Fiber</option>
+                                <option value="Wireless">Wireless</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- Display Specs -->
+                    <div id="display_specs" style="display: none;">
+                        <div class="mb-3">
+                            <label for="screen_size" class="form-label">Screen Size</label>
+                            <input type="text" class="form-control" id="screen_size" name="screen_size" 
+                                   placeholder="e.g., 24 inch, 55 inch">
+                        </div>
+                        <div class="mb-3">
+                            <label for="resolution" class="form-label">Resolution</label>
+                            <select class="form-select" id="resolution" name="resolution">
+                                <option value="">Select Resolution</option>
+                                <option value="1920x1080">1920x1080 (Full HD)</option>
+                                <option value="2560x1440">2560x1440 (2K)</option>
+                                <option value="3840x2160">3840x2160 (4K)</option>
+                                <option value="1366x768">1366x768 (HD)</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- Audio/Video Specs -->
+                    <div id="audio_specs" style="display: none;">
+                        <div class="mb-3">
+                            <label for="audio_type" class="form-label">Audio Type</label>
+                            <select class="form-select" id="audio_type" name="audio_type">
+                                <option value="">Select Type</option>
+                                <option value="Microphone">Microphone</option>
+                                <option value="Speaker">Speaker</option>
+                                <option value="Headset">Headset</option>
+                                <option value="Podcast Kit">Podcast Kit</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- Connector Specs -->
+                    <div id="connector_specs" style="display: none;">
+                        <div class="mb-3">
+                            <label for="connector_type" class="form-label">Connector Type</label>
+                            <select class="form-select" id="connector_type" name="connector_type">
+                                <option value="">Select Type</option>
+                                <option value="HDMI">HDMI</option>
+                                <option value="USB-C">USB-C</option>
+                                <option value="Lightning">Lightning</option>
+                                <option value="Ethernet">Ethernet</option>
+                                <option value="VGA">VGA</option>
+                                <option value="DisplayPort">DisplayPort</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Assignment & Location -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h6 class="card-title mb-0">
+                        <i class="fas fa-map-marker-alt text-warning me-2"></i>Assignment & Location
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <label for="assigned_to" class="form-label">Assigned To</label>
+                        <input type="text" class="form-control" id="assigned_to" name="assigned_to" 
+                               placeholder="Employee name or ID">
+                    </div>
+                    <div class="mb-3">
+                        <label for="assign_date" class="form-label">Assign Date</label>
+                        <input type="date" class="form-control" id="assign_date" name="assign_date">
+                    </div>
+                    <div class="mb-3">
+                        <label for="location" class="form-label">Location</label>
+                        <input type="text" class="form-control" id="location" name="location" 
+                               placeholder="e.g., Floor 2, Room 201, Desk A1">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Additional Notes -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h6 class="card-title mb-0">
+                        <i class="fas fa-sticky-note text-secondary me-2"></i>Additional Information
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <label for="remarks" class="form-label">Remarks</label>
+                        <textarea class="form-control" id="remarks" name="remarks" rows="4" 
+                                  placeholder="Any additional notes, damage reports, upgrades, etc."></textarea>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Action Buttons -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-body">
+                    <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                        <a href="{{ url_for('assets') }}" class="btn btn-secondary me-md-2">Cancel</a>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-save me-2"></i>Save Asset
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</form>
+
+<script>
+// Asset category mapping
+const assetCategories = {
+    'laptop': 'Computing',
+    'desktop': 'Computing',
+    'cpu': 'Computing',
+    'mobile': 'Mobile Device',
+    'tablet': 'Mobile Device',
+    'ipad': 'Mobile Device',
+    'iphone': 'Mobile Device',
+    'pendrive': 'Storage',
+    'harddisk': 'Storage',
+    'ssd': 'Storage',
+    'keyboard': 'Peripheral',
+    'mouse': 'Peripheral',
+    'monitor': 'Display',
+    'television': 'Display',
+    'projector': 'Display',
+    'router': 'Network',
+    'switch': 'Network',
+    'firewall': 'Network',
+    'loadbalancer': 'Network',
+    'printer': 'Office Equipment',
+    'extension': 'Office Equipment',
+    'speaker': 'Audio/Video',
+    'microphone': 'Audio/Video',
+    'podcast': 'Audio/Video',
+    'hdmi': 'Connector',
+    'usbc': 'Connector',
+    'lightning': 'Connector',
+    'ethernet': 'Connector'
+};
+
+function updateAssetCategory() {
+    const assetType = document.getElementById('asset_type').value;
+    const categoryField = document.getElementById('asset_category');
+    categoryField.value = assetCategories[assetType] || 'Other';
+    
+    // Show/hide relevant specification fields
+    showRelevantSpecs(assetType);
+}
+
+function showRelevantSpecs(assetType) {
+    // Hide all spec sections
+    document.getElementById('computing_specs').style.display = 'none';
+    document.getElementById('network_specs').style.display = 'none';
+    document.getElementById('display_specs').style.display = 'none';
+    document.getElementById('audio_specs').style.display = 'none';
+    document.getElementById('connector_specs').style.display = 'none';
+    
+    // Show relevant sections based on asset type
+    const category = assetCategories[assetType];
+    
+    if (category === 'Computing' || category === 'Mobile Device') {
+        document.getElementById('computing_specs').style.display = 'block';
+    }
+    
+    if (category === 'Network') {
+        document.getElementById('network_specs').style.display = 'block';
+    }
+    
+    if (category === 'Display') {
+        document.getElementById('display_specs').style.display = 'block';
+    }
+    
+    if (category === 'Audio/Video') {
+        document.getElementById('audio_specs').style.display = 'block';
+    }
+    
+    if (category === 'Connector') {
+        document.getElementById('connector_specs').style.display = 'block';
+    }
+}
+
+function toggleOwnershipFields() {
+    const ownershipType = document.getElementById('ownership_type').value;
+    const rentalFields = document.getElementById('rental_fields');
+    const purchaseFields = document.querySelectorAll('#purchase_date_field, #purchase_cost_field');
+    
+    if (ownershipType === 'rented' || ownershipType === 'leased') {
+        rentalFields.style.display = 'block';
+        purchaseFields.forEach(field => field.style.display = 'none');
+    } else {
+        rentalFields.style.display = 'none';
+        purchaseFields.forEach(field => field.style.display = 'block');
+    }
+}
+
+// Initialize form
+document.addEventListener('DOMContentLoaded', function() {
+    toggleOwnershipFields();
+});
+</script>
+{% endblock %}

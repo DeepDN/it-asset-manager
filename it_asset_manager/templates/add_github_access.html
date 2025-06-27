@@ -1,0 +1,106 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+    <h1 class="h2"><i class="fas fa-plus"></i> Add GitHub Access</h1>
+    <div class="btn-toolbar mb-2 mb-md-0">
+        <a href="{{ url_for('github_access') }}" class="btn btn-outline-secondary">
+            <i class="fas fa-arrow-left"></i> Back to GitHub Access
+        </a>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-body">
+                <form method="POST">
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="user_name" class="form-label">User Name *</label>
+                            <input type="text" class="form-control" id="user_name" name="user_name" required placeholder="GitHub username">
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="organization_name" class="form-label">Organization Name *</label>
+                            <input type="text" class="form-control" id="organization_name" name="organization_name" required placeholder="GitHub organization">
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="repo_name" class="form-label">Repository Name *</label>
+                            <input type="text" class="form-control" id="repo_name" name="repo_name" required placeholder="Repository name">
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="access_type" class="form-label">Access Type *</label>
+                            <select class="form-select" id="access_type" name="access_type" required>
+                                <option value="">Select Access Type</option>
+                                <option value="Admin">Admin</option>
+                                <option value="Maintainer">Maintainer</option>
+                                <option value="Write">Write</option>
+                                <option value="Triage">Triage</option>
+                                <option value="Read">Read</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="assign_date" class="form-label">Assign Date *</label>
+                            <input type="date" class="form-control" id="assign_date" name="assign_date" required>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="remove_date" class="form-label">Remove Date</label>
+                            <input type="date" class="form-control" id="remove_date" name="remove_date">
+                            <div class="form-text">Leave empty if access is still active</div>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="remarks" class="form-label">Remarks</label>
+                        <textarea class="form-control" id="remarks" name="remarks" rows="3" placeholder="Any additional notes about this GitHub access"></textarea>
+                    </div>
+
+                    <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                        <a href="{{ url_for('github_access') }}" class="btn btn-secondary me-md-2">Cancel</a>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-save"></i> Save GitHub Access
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-header">
+                <h6 class="card-title mb-0"><i class="fab fa-github"></i> GitHub Access Types</h6>
+            </div>
+            <div class="card-body">
+                <ul class="list-unstyled">
+                    <li><span class="badge bg-danger">Admin</span> - Full repository access</li>
+                    <li><span class="badge bg-warning">Maintainer</span> - Manage repository without access to sensitive actions</li>
+                    <li><span class="badge bg-primary">Write</span> - Read, clone, and push to repository</li>
+                    <li><span class="badge bg-info">Triage</span> - Read and manage issues and pull requests</li>
+                    <li><span class="badge bg-success">Read</span> - Read and clone repository</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="card mt-3">
+            <div class="card-header">
+                <h6 class="card-title mb-0"><i class="fas fa-info-circle"></i> Guidelines</h6>
+            </div>
+            <div class="card-body">
+                <ul class="list-unstyled">
+                    <li><i class="fas fa-check text-success"></i> Use actual GitHub usernames</li>
+                    <li><i class="fas fa-check text-success"></i> Organization name should match GitHub org</li>
+                    <li><i class="fas fa-check text-success"></i> Repository name without .git extension</li>
+                    <li><i class="fas fa-check text-success"></i> Set remove date when access is revoked</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,106 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+    <h1 class="h2"><i class="fas fa-plus"></i> Add Application Access</h1>
+    <div class="btn-toolbar mb-2 mb-md-0">
+        <a href="{{ url_for('app_access') }}" class="btn btn-outline-secondary">
+            <i class="fas fa-arrow-left"></i> Back to App Access
+        </a>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-body">
+                <form method="POST">
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="user_name" class="form-label">User Name *</label>
+                            <input type="text" class="form-control" id="user_name" name="user_name" required placeholder="Employee name or username">
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="application_name" class="form-label">Application Name *</label>
+                            <input type="text" class="form-control" id="application_name" name="application_name" required placeholder="e.g., GitHub, Google Suite, Slack">
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="access_level" class="form-label">Access Level *</label>
+                            <select class="form-select" id="access_level" name="access_level" required>
+                                <option value="">Select Access Level</option>
+                                <option value="Admin">Admin</option>
+                                <option value="Write">Write</option>
+                                <option value="Read">Read</option>
+                                <option value="Viewer">Viewer</option>
+                                <option value="Editor">Editor</option>
+                                <option value="Contributor">Contributor</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="assign_date" class="form-label">Assign Date *</label>
+                            <input type="date" class="form-control" id="assign_date" name="assign_date" required>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="remove_date" class="form-label">Remove Date</label>
+                            <input type="date" class="form-control" id="remove_date" name="remove_date">
+                            <div class="form-text">Leave empty if access is still active</div>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="remarks" class="form-label">Remarks</label>
+                        <textarea class="form-control" id="remarks" name="remarks" rows="3" placeholder="Any additional notes about this access grant"></textarea>
+                    </div>
+
+                    <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                        <a href="{{ url_for('app_access') }}" class="btn btn-secondary me-md-2">Cancel</a>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-save"></i> Save Access
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-header">
+                <h6 class="card-title mb-0"><i class="fas fa-info-circle"></i> Common Applications</h6>
+            </div>
+            <div class="card-body">
+                <ul class="list-unstyled">
+                    <li><i class="fab fa-github"></i> GitHub</li>
+                    <li><i class="fab fa-google"></i> Google Workspace</li>
+                    <li><i class="fab fa-slack"></i> Slack</li>
+                    <li><i class="fab fa-microsoft"></i> Microsoft 365</li>
+                    <li><i class="fab fa-aws"></i> AWS Console</li>
+                    <li><i class="fas fa-database"></i> Database Systems</li>
+                    <li><i class="fas fa-server"></i> Server Access</li>
+                    <li><i class="fas fa-shield-alt"></i> VPN Access</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="card mt-3">
+            <div class="card-header">
+                <h6 class="card-title mb-0"><i class="fas fa-key"></i> Access Levels</h6>
+            </div>
+            <div class="card-body">
+                <ul class="list-unstyled">
+                    <li><span class="badge bg-danger">Admin</span> - Full control</li>
+                    <li><span class="badge bg-warning">Write</span> - Read & Write</li>
+                    <li><span class="badge bg-success">Read</span> - Read only</li>
+                    <li><span class="badge bg-info">Viewer</span> - View only</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,128 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+    <h1 class="h2"><i class="fas fa-edit"></i> Edit Asset</h1>
+    <div class="btn-toolbar mb-2 mb-md-0">
+        <a href="{{ url_for('assets') }}" class="btn btn-outline-secondary">
+            <i class="fas fa-arrow-left"></i> Back to Assets
+        </a>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-body">
+                <form method="POST">
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="asset_type" class="form-label">Asset Type *</label>
+                            <select class="form-select" id="asset_type" name="asset_type" required>
+                                <option value="">Select Asset Type</option>
+                                <option value="laptop" {% if asset.asset_type == 'laptop' %}selected{% endif %}>Laptop</option>
+                                <option value="desktop" {% if asset.asset_type == 'desktop' %}selected{% endif %}>Desktop</option>
+                                <option value="mobile" {% if asset.asset_type == 'mobile' %}selected{% endif %}>Mobile</option>
+                                <option value="tablet" {% if asset.asset_type == 'tablet' %}selected{% endif %}>Tablet</option>
+                                <option value="monitor" {% if asset.asset_type == 'monitor' %}selected{% endif %}>Monitor</option>
+                                <option value="printer" {% if asset.asset_type == 'printer' %}selected{% endif %}>Printer</option>
+                                <option value="other" {% if asset.asset_type == 'other' %}selected{% endif %}>Other</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="brand" class="form-label">Brand</label>
+                            <input type="text" class="form-control" id="brand" name="brand" value="{{ asset.brand or '' }}" placeholder="e.g., Dell, HP, Apple">
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="model" class="form-label">Model</label>
+                            <input type="text" class="form-control" id="model" name="model" value="{{ asset.model or '' }}" placeholder="e.g., Latitude 5520">
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="serial_number" class="form-label">Serial Number *</label>
+                            <input type="text" class="form-control" id="serial_number" name="serial_number" value="{{ asset.serial_number }}" required placeholder="Unique serial number">
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="processor" class="form-label">Processor</label>
+                            <input type="text" class="form-control" id="processor" name="processor" value="{{ asset.processor or '' }}" placeholder="e.g., Intel i7-11800H">
+                        </div>
+                        <div class="col-md-3 mb-3">
+                            <label for="ram_gb" class="form-label">RAM (GB)</label>
+                            <input type="number" class="form-control" id="ram_gb" name="ram_gb" value="{{ asset.ram_gb or '' }}" placeholder="8">
+                        </div>
+                        <div class="col-md-3 mb-3">
+                            <label for="storage_gb" class="form-label">Storage (GB)</label>
+                            <input type="number" class="form-control" id="storage_gb" name="storage_gb" value="{{ asset.storage_gb or '' }}" placeholder="512">
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="storage_type" class="form-label">Storage Type</label>
+                            <select class="form-select" id="storage_type" name="storage_type">
+                                <option value="">Select Storage Type</option>
+                                <option value="SSD" {% if asset.storage_type == 'SSD' %}selected{% endif %}>SSD</option>
+                                <option value="HDD" {% if asset.storage_type == 'HDD' %}selected{% endif %}>HDD</option>
+                                <option value="Hybrid" {% if asset.storage_type == 'Hybrid' %}selected{% endif %}>Hybrid</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="assigned_to" class="form-label">Assigned To</label>
+                            <input type="text" class="form-control" id="assigned_to" name="assigned_to" value="{{ asset.assigned_to or '' }}" placeholder="Employee name or ID">
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="assign_date" class="form-label">Assign Date</label>
+                            <input type="date" class="form-control" id="assign_date" name="assign_date" value="{{ asset.assign_date.strftime('%Y-%m-%d') if asset.assign_date else '' }}">
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="remove_date" class="form-label">Remove Date</label>
+                            <input type="date" class="form-control" id="remove_date" name="remove_date" value="{{ asset.remove_date.strftime('%Y-%m-%d') if asset.remove_date else '' }}">
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="remarks" class="form-label">Remarks</label>
+                        <textarea class="form-control" id="remarks" name="remarks" rows="3" placeholder="Any additional notes, damage reports, upgrades, etc.">{{ asset.remarks or '' }}</textarea>
+                    </div>
+
+                    <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                        <a href="{{ url_for('assets') }}" class="btn btn-secondary me-md-2">Cancel</a>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-save"></i> Update Asset
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-header">
+                <h6 class="card-title mb-0"><i class="fas fa-info-circle"></i> Asset Information</h6>
+            </div>
+            <div class="card-body">
+                <p><strong>Created:</strong> {{ asset.created_at.strftime('%Y-%m-%d %H:%M') }}</p>
+                <p><strong>Current Status:</strong> 
+                    <span class="badge bg-{% if asset.status == 'assigned' %}success{% else %}warning{% endif %}">
+                        {{ asset.status.title() }}
+                    </span>
+                </p>
+                {% if asset.assigned_to and asset.remove_date %}
+                    <div class="alert alert-warning">
+                        <i class="fas fa-exclamation-triangle"></i> This asset was returned on {{ asset.remove_date.strftime('%Y-%m-%d') }}
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

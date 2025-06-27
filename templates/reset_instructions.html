@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reset Instructions - IT Asset Manager</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --primary-color: #2c3e50;
+            --secondary-color: #34495e;
+            --accent-color: #3498db;
+            --success-color: #27ae60;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+        }
+
+        .instructions-card {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.2);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            overflow: hidden;
+            position: relative;
+        }
+
+        .instructions-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 5px;
+            background: linear-gradient(90deg, var(--success-color), #2ecc71, var(--accent-color));
+        }
+
+        .success-icon {
+            width: 80px;
+            height: 80px;
+            background: linear-gradient(135deg, var(--success-color), #2ecc71);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 1.5rem auto;
+            box-shadow: 0 10px 30px rgba(39, 174, 96, 0.3);
+        }
+
+        .success-icon i {
+            color: white;
+            font-size: 2rem;
+        }
+
+        .reset-link-box {
+            background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin: 1.5rem 0;
+            border: 2px dashed var(--accent-color);
+            text-align: center;
+        }
+
+        .reset-link {
+            background: white;
+            border: 2px solid var(--accent-color);
+            border-radius: 8px;
+            padding: 1rem;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9rem;
+            color: var(--primary-color);
+            word-break: break-all;
+            margin: 1rem 0;
+        }
+
+        .btn-copy {
+            background: linear-gradient(135deg, var(--accent-color), #5dade2);
+            border: none;
+            border-radius: 8px;
+            padding: 0.5rem 1rem;
+            color: white;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+
+        .btn-copy:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(52, 152, 219, 0.3);
+            color: white;
+        }
+
+        .btn-login {
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            border: none;
+            border-radius: 12px;
+            padding: 1rem 2rem;
+            color: white;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .btn-login:hover {
+            transform: translateY(-2px);
+            color: white;
+        }
+
+        .warning-box {
+            background: linear-gradient(135deg, #f39c12, #e67e22);
+            color: white;
+            border-radius: 12px;
+            padding: 1rem;
+            margin: 1rem 0;
+        }
+
+        .author-credit {
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+            color: white;
+            border: none !important;
+            transition: all 0.3s ease;
+            border-radius: 25px;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+        }
+
+        .author-credit:hover {
+            opacity: 1 !important;
+            transform: scale(1.05) translateY(-2px);
+            box-shadow: 0 12px 35px rgba(0,0,0,0.2);
+        }
+
+        .author-credit i {
+            color: #f39c12;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+            100% { transform: scale(1); }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-md-8 col-lg-6">
+                <div class="card instructions-card">
+                    <div class="card-body p-5">
+                        <div class="text-center mb-4">
+                            <div class="success-icon">
+                                <i class="fas fa-check"></i>
+                            </div>
+                            <h3 class="mb-2" style="color: var(--primary-color); font-weight: 700;">
+                                Reset Link Generated!
+                            </h3>
+                            <p class="text-muted">Your password reset link has been created successfully</p>
+                        </div>
+
+                        <div class="reset-link-box">
+                            <h6 class="mb-3">
+                                <i class="fas fa-link text-primary me-2"></i>Your Password Reset Link:
+                            </h6>
+                            
+                            <div class="reset-link" id="resetLink">
+                                {{ url_for('reset_password', token=reset_info.token, _external=True) }}
+                            </div>
+                            
+                            <button class="btn btn-copy" onclick="copyResetLink()">
+                                <i class="fas fa-copy me-2"></i>Copy Link
+                            </button>
+                            
+                            <div class="mt-3">
+                                <a href="{{ url_for('reset_password', token=reset_info.token) }}" 
+                                   class="btn btn-primary">
+                                    <i class="fas fa-key me-2"></i>Reset Password Now
+                                </a>
+                            </div>
+                        </div>
+
+                        <div class="warning-box">
+                            <h6 class="mb-2">
+                                <i class="fas fa-exclamation-triangle me-2"></i>Important Information:
+                            </h6>
+                            <ul class="mb-0 small">
+                                <li><strong>Username:</strong> {{ reset_info.username }}</li>
+                                <li><strong>Expires:</strong> {{ reset_info.expiry }}</li>
+                                <li>This link will expire in 1 hour for security</li>
+                                <li>Use the link only once to reset your password</li>
+                            </ul>
+                        </div>
+
+                        <div class="row mt-4">
+                            <div class="col-md-6 mb-2">
+                                <a href="{{ url_for('reset_password', token=reset_info.token) }}" 
+                                   class="btn btn-primary w-100">
+                                    <i class="fas fa-key me-2"></i>Reset Password
+                                </a>
+                            </div>
+                            <div class="col-md-6 mb-2">
+                                <a href="{{ url_for('login') }}" class="btn btn-login w-100">
+                                    <i class="fas fa-sign-in-alt me-2"></i>Back to Login
+                                </a>
+                            </div>
+                        </div>
+
+                        <div class="text-center mt-4">
+                            <small class="text-muted">
+                                <i class="fas fa-info-circle me-1"></i>
+                                In a production environment, this link would be sent to your email address.
+                            </small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Author Information -->
+    <div class="position-fixed bottom-0 end-0 p-3" style="z-index: 1000;">
+        <div class="author-credit px-4 py-2 shadow" style="font-size: 0.8rem; opacity: 0.9;">
+            <i class="fas fa-code me-2"></i> 
+            <strong>Created by:</strong> Deepak Nemade
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        function copyResetLink() {
+            const resetLink = document.getElementById('resetLink');
+            const text = resetLink.textContent;
+            
+            navigator.clipboard.writeText(text).then(function() {
+                // Change button text temporarily
+                const button = event.target.closest('button');
+                const originalText = button.innerHTML;
+                button.innerHTML = '<i class="fas fa-check me-2"></i>Copied!';
+                button.classList.add('btn-success');
+                button.classList.remove('btn-copy');
+                
+                setTimeout(() => {
+                    button.innerHTML = originalText;
+                    button.classList.remove('btn-success');
+                    button.classList.add('btn-copy');
+                }, 2000);
+            }).catch(function(err) {
+                console.error('Could not copy text: ', err);
+                alert('Failed to copy link. Please copy it manually.');
+            });
+        }
+    </script>
+</body>
+</html>
