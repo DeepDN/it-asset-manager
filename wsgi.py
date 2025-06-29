@@ -7,34 +7,42 @@ like Gunicorn, uWSGI, or Apache mod_wsgi.
 """
 
 import os
-from it_asset_manager.core.app import create_app
-from it_asset_manager.models.user import User
-from it_asset_manager.core.database import db
+import sys
 
-# Create application instance
-config_name = os.environ.get('FLASK_ENV', 'production')
-app = create_app(config_name)
+# Add the current directory to Python path
+sys.path.insert(0, os.path.dirname(__file__))
 
+# Import the Flask app from app.py
+from app import app
 
+# Create default admin user if it doesn't exist
 def create_default_admin():
     """Create default admin user if it doesn't exist."""
+    from app import db, User
+    
     with app.app_context():
-        admin_user = User.find_by_username('admin')
+        # Create tables if they don't exist
+        db.create_all()
+        
+        # Check if admin user exists
+        admin_user = User.query.filter_by(username='admin').first()
         if not admin_user:
             admin_user = User()
             admin_user.username = 'admin'
             admin_user.email = 'admin@example.com'
-            admin_user.set_password(os.environ.get('ADMIN_PASSWORD', 'admin123'))
+            admin_user.password_hash = generate_password_hash(
+                os.environ.get('ADMIN_PASSWORD', 'admin123')
+            )
             
             db.session.add(admin_user)
             db.session.commit()
             print("Default admin user created")
 
+# Import password hashing function
+from werkzeug.security import generate_password_hash
 
 # Initialize database and create admin user
-with app.app_context():
-    db.create_all()
-    create_default_admin()
+create_default_admin()
 
 if __name__ == "__main__":
     app.run()

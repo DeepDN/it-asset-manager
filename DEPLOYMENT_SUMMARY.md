@@ -87,7 +87,7 @@ sudo chmod +x /usr/local/bin/docker-compose
 #### **3. Deploy Application**
 ```bash
 # Clone repository
-git clone https://github.com/deepaknemade/it-asset-manager.git
+git clone https://github.com/DeepDN/it-asset-manager.git
 cd it-asset-manager
 
 # Configure environment

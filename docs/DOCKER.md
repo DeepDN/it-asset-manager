@@ -32,7 +32,7 @@ This guide covers Docker deployment options for the IT Asset Manager application
 
 1. **Clone and Setup**
    ```bash
-   git clone https://github.com/deepaknemade/it-asset-manager.git
+   git clone https://github.com/DeepDN/it-asset-manager.git
    cd it-asset-manager
    cp .env.example .env.dev
    ```

@@ -1,7 +1,6 @@
 version: '3.8'
 
 services:
-  # Development Flask application
   app:
     build:
       context: .
@@ -14,15 +13,11 @@ services:
       - FLASK_ENV=development
       - FLASK_DEBUG=1
       - SECRET_KEY=dev-secret-key-change-in-production
-      - DATABASE_URL=sqlite:///instance/it_assets.db
+      - SQLALCHEMY_DATABASE_URI=sqlite:///instance/it_assets.db
     volumes:
-      # Mount source code for development
       - .:/app
-      # Persist SQLite database
       - sqlite_data:/app/instance
-      # Persist logs
       - ./logs:/app/logs
-      # Persist uploads
       - ./uploads:/app/uploads
     networks:
       - it-asset-network
@@ -36,7 +31,6 @@ services:
 
 volumes:
   sqlite_data:
-    driver: local
 
 networks:
   it-asset-network:

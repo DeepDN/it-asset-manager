@@ -1,7 +1,6 @@
 version: '3.8'
 
 services:
-  # Production Flask application
   app:
     build:
       context: .
@@ -11,14 +10,11 @@ services:
     environment:
       - FLASK_ENV=production
       - SECRET_KEY=${SECRET_KEY:-your-super-secret-key-change-this}
-      - DATABASE_URL=${DATABASE_URL:-sqlite:///instance/it_assets.db}
+      - SQLALCHEMY_DATABASE_URI=sqlite:///instance/it_assets.db
       - ADMIN_PASSWORD=${ADMIN_PASSWORD:-admin123}
     volumes:
-      # Persist SQLite database
       - sqlite_prod_data:/app/instance
-      # Persist logs
       - ./logs:/app/logs
-      # Persist uploads
       - ./uploads:/app/uploads
     ports:
       - "8000:8000"
@@ -32,7 +28,6 @@ services:
       retries: 3
       start_period: 40s
 
-  # Nginx reverse proxy
   nginx:
     image: nginx:alpine
     container_name: it-asset-manager-nginx
@@ -41,7 +36,7 @@ services:
       - "443:443"
     volumes:
       - ./docker/nginx/prod.conf:/etc/nginx/conf.d/default.conf
-      - ./it_asset_manager/static:/var/www/static:ro
+      - ./static:/var/www/static:ro
       - ./logs/nginx:/var/log/nginx
       - ./docker/nginx/ssl:/etc/nginx/ssl:ro
     depends_on:
@@ -52,7 +47,6 @@ services:
 
 volumes:
   sqlite_prod_data:
-    driver: local
 
 networks:
   it-asset-network:

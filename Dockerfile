@@ -1,5 +1,5 @@
 # Multi-stage build for production optimization
-FROM python:3.11-slim as base
+FROM python:3.11-slim AS base
 
 # Set environment variables
 ENV PYTHONDONTWRITEBYTECODE=1 \
@@ -29,7 +29,7 @@ COPY requirements-docker.txt .
 RUN pip install --no-cache-dir -r requirements-docker.txt
 
 # Development stage
-FROM base as development
+FROM base AS development
 
 # Install development dependencies
 RUN pip install --no-cache-dir pytest pytest-flask pytest-cov black flake8 mypy
@@ -55,7 +55,7 @@ HEALTHCHECK --interval=30s --timeout=30s --start-period=5s --retries=3 \
 CMD ["python", "run.py"]
 
 # Production stage
-FROM base as production
+FROM base AS production
 
 # Install production dependencies only
 RUN pip install --no-cache-dir gunicorn
