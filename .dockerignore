@@ -1,41 +1,33 @@
 # Git
 .git
 .gitignore
-.gitattributes
-
-# Documentation
-README.md
-docs/
-*.md
 
 # Python
-__pycache__/
-*.py[cod]
-*$py.class
-*.so
+__pycache__
+*.pyc
+*.pyo
+*.pyd
 .Python
-build/
-develop-eggs/
-dist/
-downloads/
-eggs/
-.eggs/
-lib/
-lib64/
-parts/
-sdist/
-var/
-wheels/
-*.egg-info/
-.installed.cfg
-*.egg
-MANIFEST
+env
+pip-log.txt
+pip-delete-this-directory.txt
+.tox
+.coverage
+.coverage.*
+.cache
+nosetests.xml
+coverage.xml
+*.cover
+*.log
+.git
+.mypy_cache
+.pytest_cache
+.hypothesis
 
 # Virtual environments
 venv/
 env/
 ENV/
-.venv/
 
 # IDE
 .vscode/
@@ -43,53 +35,6 @@ ENV/
 *.swp
 *.swo
 *~
-
-# Testing
-.pytest_cache/
-.coverage
-htmlcov/
-.tox/
-.cache
-nosetests.xml
-coverage.xml
-*.cover
-.hypothesis/
-
-# Logs
-*.log
-logs/
-
-# Database
-*.db
-*.sqlite
-*.sqlite3
-instance/
-
-# Environment files
-.env
-.env.*
-!.env.example
-
-# Docker
-Dockerfile*
-docker-compose*.yml
-.dockerignore
-
-# CI/CD
-.github/
-.gitlab-ci.yml
-.travis.yml
-Jenkinsfile
-
-# Backups
-backups/
-*.sql
-*.dump
-
-# Temporary files
-tmp/
-temp/
-.tmp/
 
 # OS
 .DS_Store
@@ -100,25 +45,37 @@ temp/
 ehthumbs.db
 Thumbs.db
 
-# Node.js (if any)
-node_modules/
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
-
-# Uploads
+# Project specific
+instance/
+logs/
 uploads/
+backups/
+*.db
+*.sqlite
+*.sqlite3
 
-# SSL certificates
-*.pem
-*.key
-*.crt
-*.csr
+# Documentation
+docs/
+*.md
+!README.md
 
-# Monitoring
-prometheus_data/
-grafana_data/
+# Docker
+Dockerfile*
+docker-compose*.yml
+.dockerignore
 
-# Performance test results
-performance-results.json
-k6-results/
+# Environment files
+.env*
+!.env.example
+
+# Test files
+tests/
+pytest.ini
+.coverage
+
+# Development tools
+Makefile
+setup.sh
+migrate_*.py
+add_sample_data.py
+update_password.py
