@@ -1,0 +1,131 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="page-header">
+    <div class="d-flex justify-content-between align-items-center">
+        <div>
+            <h1 class="mb-2"><i class="fas fa-upload me-3"></i>Bulk Upload GitHub Access</h1>
+            <p class="text-muted mb-0">Upload multiple GitHub access records using a CSV file</p>
+        </div>
+        <div>
+            <a href="{{ url_for('github_access') }}" class="btn btn-secondary">
+                <i class="fas fa-arrow-left me-2"></i>Back to GitHub Access
+            </a>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-lg-8">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title mb-0">
+                    <i class="fas fa-file-csv text-success me-2"></i>Upload CSV File
+                </h5>
+            </div>
+            <div class="card-body">
+                <form method="POST" enctype="multipart/form-data">
+                    <div class="mb-4">
+                        <label for="file" class="form-label">Select CSV File</label>
+                        <input type="file" class="form-control" id="file" name="file" accept=".csv" required>
+                        <div class="form-text">
+                            <i class="fas fa-info-circle me-1"></i>
+                            Only CSV files are accepted. Maximum file size: 10MB
+                        </div>
+                    </div>
+                    
+                    <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-upload me-2"></i>Upload Access Records
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-lg-4">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title mb-0">
+                    <i class="fas fa-download text-info me-2"></i>Download Template
+                </h5>
+            </div>
+            <div class="card-body">
+                <p class="text-muted">Download the CSV template to see the required format and sample data.</p>
+                <a href="{{ url_for('download_github_access_template') }}" class="btn btn-info">
+                    <i class="fas fa-download me-2"></i>Download Template
+                </a>
+            </div>
+        </div>
+        
+        <div class="card mt-4">
+            <div class="card-header">
+                <h5 class="card-title mb-0">
+                    <i class="fas fa-exclamation-triangle text-warning me-2"></i>Important Notes
+                </h5>
+            </div>
+            <div class="card-body">
+                <ul class="list-unstyled mb-0">
+                    <li class="mb-2">
+                        <i class="fas fa-check text-success me-2"></i>
+                        Use the exact column headers from template
+                    </li>
+                    <li class="mb-2">
+                        <i class="fas fa-check text-success me-2"></i>
+                        Date format: YYYY-MM-DD
+                    </li>
+                    <li class="mb-2">
+                        <i class="fas fa-check text-success me-2"></i>
+                        Access Level: read, write, admin
+                    </li>
+                    <li class="mb-0">
+                        <i class="fas fa-check text-success me-2"></i>
+                        Status: active, inactive, suspended
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row mt-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title mb-0">
+                    <i class="fas fa-table text-primary me-2"></i>CSV Format Example
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-sm table-bordered">
+                        <thead class="table-light">
+                            <tr>
+                                <th>user_name</th>
+                                <th>github_username</th>
+                                <th>repository_name</th>
+                                <th>access_level</th>
+                                <th>granted_date</th>
+                                <th>status</th>
+                                <th>notes</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>Jane Smith</td>
+                                <td>janesmith</td>
+                                <td>company-website</td>
+                                <td>write</td>
+                                <td>2024-02-01</td>
+                                <td>active</td>
+                                <td>Frontend development access</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

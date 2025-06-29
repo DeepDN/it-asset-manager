@@ -4,9 +4,19 @@
 <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
     <h1 class="h2"><i class="fab fa-github"></i> GitHub Access</h1>
     <div class="btn-toolbar mb-2 mb-md-0">
-        <a href="{{ url_for('add_github_access') }}" class="btn btn-primary">
-            <i class="fas fa-plus"></i> Add GitHub Access
-        </a>
+        <div>
+            <div class="btn-group me-2" role="group">
+                <a href="{{ url_for('export_github_access') }}" class="btn btn-success">
+                    <i class="fas fa-download me-2"></i>Export CSV
+                </a>
+                <a href="{{ url_for('bulk_upload_github_access') }}" class="btn btn-info">
+                    <i class="fas fa-upload me-2"></i>Bulk Upload
+                </a>
+            </div>
+            <a href="{{ url_for('add_github_access') }}" class="btn btn-primary">
+                <i class="fas fa-plus me-2"></i>Add GitHub Access
+            </a>
+        </div>
     </div>
 </div>
 

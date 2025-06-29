@@ -569,6 +569,365 @@ def export_github_access():
         download_name=f'github_access_export_{datetime.now().strftime("%Y%m%d_%H%M%S")}.csv'
     )
 
+# Bulk Upload Routes
+@app.route('/assets/bulk-upload', methods=['GET', 'POST'])
+@login_required
+def bulk_upload_assets():
+    if request.method == 'POST':
+        if 'file' not in request.files:
+            flash('No file selected', 'error')
+            return redirect(request.url)
+        
+        file = request.files['file']
+        if file.filename == '':
+            flash('No file selected', 'error')
+            return redirect(request.url)
+        
+        if file and file.filename.lower().endswith('.csv'):
+            try:
+                # Read CSV file
+                stream = io.StringIO(file.stream.read().decode("UTF8"), newline=None)
+                csv_input = csv.reader(stream)
+                
+                # Skip header row
+                next(csv_input)
+                
+                success_count = 0
+                error_count = 0
+                errors = []
+                
+                for row_num, row in enumerate(csv_input, start=2):
+                    try:
+                        if len(row) < 13:  # Minimum required columns
+                            errors.append(f"Row {row_num}: Insufficient columns")
+                            error_count += 1
+                            continue
+                        
+                        # Check if asset tag already exists
+                        existing_asset = Asset.query.filter_by(asset_tag=row[0]).first()
+                        if existing_asset:
+                            errors.append(f"Row {row_num}: Asset tag '{row[0]}' already exists")
+                            error_count += 1
+                            continue
+                        
+                        # Create new asset
+                        asset = Asset(
+                            asset_tag=row[0],
+                            asset_type=row[1],
+                            brand=row[2],
+                            model=row[3],
+                            serial_number=row[4],
+                            status=row[5] if row[5] in ['assigned', 'unassigned', 'maintenance', 'retired'] else 'unassigned',
+                            condition=row[6] if row[6] in ['excellent', 'good', 'fair', 'poor'] else 'good',
+                            location=row[7],
+                            purchase_date=row[8] if row[8] else None,
+                            warranty_expiry=row[9] if row[9] else None,
+                            cost=float(row[10]) if row[10] and row[10].replace('.', '').isdigit() else 0.0,
+                            ownership=row[11] if row[11] in ['purchased', 'leased', 'rented'] else 'purchased',
+                            vendor=row[12],
+                            notes=row[13] if len(row) > 13 else ''
+                        )
+                        
+                        db.session.add(asset)
+                        success_count += 1
+                        
+                    except Exception as e:
+                        errors.append(f"Row {row_num}: {str(e)}")
+                        error_count += 1
+                
+                # Commit all successful additions
+                if success_count > 0:
+                    db.session.commit()
+                    flash(f'Successfully imported {success_count} assets', 'success')
+                
+                if error_count > 0:
+                    flash(f'{error_count} rows had errors. Check the error log below.', 'warning')
+                    for error in errors[:10]:  # Show first 10 errors
+                        flash(error, 'error')
+                    if len(errors) > 10:
+                        flash(f'... and {len(errors) - 10} more errors', 'error')
+                
+                return redirect(url_for('assets'))
+                
+            except Exception as e:
+                flash(f'Error processing CSV file: {str(e)}', 'error')
+                return redirect(request.url)
+        else:
+            flash('Please upload a CSV file', 'error')
+            return redirect(request.url)
+    
+    return render_template('bulk_upload_assets.html')
+
+@app.route('/assets/download-template')
+@login_required
+def download_asset_template():
+    """Download CSV template for bulk asset upload"""
+    output = io.StringIO()
+    writer = csv.writer(output)
+    
+    # Write header with all required columns
+    writer.writerow([
+        'asset_tag',
+        'asset_type',
+        'brand',
+        'model',
+        'serial_number',
+        'status',
+        'condition',
+        'location',
+        'purchase_date',
+        'warranty_expiry',
+        'cost',
+        'ownership',
+        'vendor',
+        'notes'
+    ])
+    
+    # Write sample data
+    writer.writerow([
+        'LAP001',
+        'Laptop',
+        'Dell',
+        'Latitude 7420',
+        'DL123456789',
+        'assigned',
+        'excellent',
+        'Office Floor 1',
+        '2024-01-15',
+        '2027-01-15',
+        '1200.00',
+        'purchased',
+        'Dell Technologies',
+        'Sample laptop entry'
+    ])
+    
+    writer.writerow([
+        'DSK001',
+        'Desktop',
+        'HP',
+        'EliteDesk 800',
+        'HP987654321',
+        'unassigned',
+        'good',
+        'Storage Room',
+        '2023-06-10',
+        '2026-06-10',
+        '800.00',
+        'purchased',
+        'HP Inc.',
+        'Sample desktop entry'
+    ])
+    
+    return send_file(
+        io.BytesIO(output.getvalue().encode()),
+        mimetype='text/csv',
+        as_attachment=True,
+        download_name='asset_upload_template.csv'
+    )
+
+@app.route('/app-access/bulk-upload', methods=['GET', 'POST'])
+@login_required
+def bulk_upload_app_access():
+    if request.method == 'POST':
+        if 'file' not in request.files:
+            flash('No file selected', 'error')
+            return redirect(request.url)
+        
+        file = request.files['file']
+        if file.filename == '':
+            flash('No file selected', 'error')
+            return redirect(request.url)
+        
+        if file and file.filename.lower().endswith('.csv'):
+            try:
+                stream = io.StringIO(file.stream.read().decode("UTF8"), newline=None)
+                csv_input = csv.reader(stream)
+                
+                # Skip header row
+                next(csv_input)
+                
+                success_count = 0
+                error_count = 0
+                errors = []
+                
+                for row_num, row in enumerate(csv_input, start=2):
+                    try:
+                        if len(row) < 5:  # Minimum required columns
+                            errors.append(f"Row {row_num}: Insufficient columns")
+                            error_count += 1
+                            continue
+                        
+                        app_access = ApplicationAccess(
+                            user_name=row[0],
+                            application_name=row[1],
+                            access_level=row[2] if row[2] in ['read', 'write', 'admin', 'full'] else 'read',
+                            granted_date=row[3] if row[3] else datetime.now().strftime('%Y-%m-%d'),
+                            status=row[4] if row[4] in ['active', 'inactive', 'suspended'] else 'active',
+                            notes=row[5] if len(row) > 5 else ''
+                        )
+                        
+                        db.session.add(app_access)
+                        success_count += 1
+                        
+                    except Exception as e:
+                        errors.append(f"Row {row_num}: {str(e)}")
+                        error_count += 1
+                
+                if success_count > 0:
+                    db.session.commit()
+                    flash(f'Successfully imported {success_count} application access records', 'success')
+                
+                if error_count > 0:
+                    flash(f'{error_count} rows had errors', 'warning')
+                    for error in errors[:5]:
+                        flash(error, 'error')
+                
+                return redirect(url_for('app_access'))
+                
+            except Exception as e:
+                flash(f'Error processing CSV file: {str(e)}', 'error')
+                return redirect(request.url)
+        else:
+            flash('Please upload a CSV file', 'error')
+            return redirect(request.url)
+    
+    return render_template('bulk_upload_app_access.html')
+
+@app.route('/app-access/download-template')
+@login_required
+def download_app_access_template():
+    """Download CSV template for bulk application access upload"""
+    output = io.StringIO()
+    writer = csv.writer(output)
+    
+    writer.writerow([
+        'user_name',
+        'application_name',
+        'access_level',
+        'granted_date',
+        'status',
+        'notes'
+    ])
+    
+    writer.writerow([
+        'John Doe',
+        'Microsoft Office 365',
+        'full',
+        '2024-01-01',
+        'active',
+        'Standard office suite access'
+    ])
+    
+    return send_file(
+        io.BytesIO(output.getvalue().encode()),
+        mimetype='text/csv',
+        as_attachment=True,
+        download_name='app_access_upload_template.csv'
+    )
+
+@app.route('/github-access/bulk-upload', methods=['GET', 'POST'])
+@login_required
+def bulk_upload_github_access():
+    if request.method == 'POST':
+        if 'file' not in request.files:
+            flash('No file selected', 'error')
+            return redirect(request.url)
+        
+        file = request.files['file']
+        if file.filename == '':
+            flash('No file selected', 'error')
+            return redirect(request.url)
+        
+        if file and file.filename.lower().endswith('.csv'):
+            try:
+                stream = io.StringIO(file.stream.read().decode("UTF8"), newline=None)
+                csv_input = csv.reader(stream)
+                
+                # Skip header row
+                next(csv_input)
+                
+                success_count = 0
+                error_count = 0
+                errors = []
+                
+                for row_num, row in enumerate(csv_input, start=2):
+                    try:
+                        if len(row) < 6:  # Minimum required columns
+                            errors.append(f"Row {row_num}: Insufficient columns")
+                            error_count += 1
+                            continue
+                        
+                        github_access = GitHubAccess(
+                            user_name=row[0],
+                            github_username=row[1],
+                            repository_name=row[2],
+                            access_level=row[3] if row[3] in ['read', 'write', 'admin'] else 'read',
+                            granted_date=row[4] if row[4] else datetime.now().strftime('%Y-%m-%d'),
+                            status=row[5] if row[5] in ['active', 'inactive', 'suspended'] else 'active',
+                            notes=row[6] if len(row) > 6 else ''
+                        )
+                        
+                        db.session.add(github_access)
+                        success_count += 1
+                        
+                    except Exception as e:
+                        errors.append(f"Row {row_num}: {str(e)}")
+                        error_count += 1
+                
+                if success_count > 0:
+                    db.session.commit()
+                    flash(f'Successfully imported {success_count} GitHub access records', 'success')
+                
+                if error_count > 0:
+                    flash(f'{error_count} rows had errors', 'warning')
+                    for error in errors[:5]:
+                        flash(error, 'error')
+                
+                return redirect(url_for('github_access'))
+                
+            except Exception as e:
+                flash(f'Error processing CSV file: {str(e)}', 'error')
+                return redirect(request.url)
+        else:
+            flash('Please upload a CSV file', 'error')
+            return redirect(request.url)
+    
+    return render_template('bulk_upload_github_access.html')
+
+@app.route('/github-access/download-template')
+@login_required
+def download_github_access_template():
+    """Download CSV template for bulk GitHub access upload"""
+    output = io.StringIO()
+    writer = csv.writer(output)
+    
+    writer.writerow([
+        'user_name',
+        'github_username',
+        'repository_name',
+        'access_level',
+        'granted_date',
+        'status',
+        'notes'
+    ])
+    
+    writer.writerow([
+        'Jane Smith',
+        'janesmith',
+        'company-website',
+        'write',
+        '2024-02-01',
+        'active',
+        'Frontend development access'
+    ])
+    
+    return send_file(
+        io.BytesIO(output.getvalue().encode()),
+        mimetype='text/csv',
+        as_attachment=True,
+        download_name='github_access_upload_template.csv'
+    )
+
 def create_admin_user():
     """Create default admin user if it doesn't exist"""
     if not User.query.filter_by(username='admin').first():
