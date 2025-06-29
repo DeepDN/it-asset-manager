@@ -1,0 +1,169 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="page-header">
+    <div class="d-flex justify-content-between align-items-center">
+        <div>
+            <h1 class="mb-2"><i class="fas fa-upload me-3"></i>Bulk Upload Assets</h1>
+            <p class="text-muted mb-0">Upload multiple assets at once using a CSV file</p>
+        </div>
+        <div>
+            <a href="{{ url_for('assets') }}" class="btn btn-secondary">
+                <i class="fas fa-arrow-left me-2"></i>Back to Assets
+            </a>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-lg-8">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title mb-0">
+                    <i class="fas fa-file-csv text-success me-2"></i>Upload CSV File
+                </h5>
+            </div>
+            <div class="card-body">
+                <form method="POST" enctype="multipart/form-data">
+                    <div class="mb-4">
+                        <label for="file" class="form-label">Select CSV File</label>
+                        <input type="file" class="form-control" id="file" name="file" accept=".csv" required>
+                        <div class="form-text">
+                            <i class="fas fa-info-circle me-1"></i>
+                            Only CSV files are accepted. Maximum file size: 10MB
+                        </div>
+                    </div>
+                    
+                    <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-upload me-2"></i>Upload Assets
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-lg-4">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title mb-0">
+                    <i class="fas fa-download text-info me-2"></i>Download Template
+                </h5>
+            </div>
+            <div class="card-body">
+                <p class="text-muted">Download the CSV template to see the required format and sample data.</p>
+                <a href="{{ url_for('download_asset_template') }}" class="btn btn-info">
+                    <i class="fas fa-download me-2"></i>Download Template
+                </a>
+            </div>
+        </div>
+        
+        <div class="card mt-4">
+            <div class="card-header">
+                <h5 class="card-title mb-0">
+                    <i class="fas fa-exclamation-triangle text-warning me-2"></i>Important Notes
+                </h5>
+            </div>
+            <div class="card-body">
+                <ul class="list-unstyled mb-0">
+                    <li class="mb-2">
+                        <i class="fas fa-check text-success me-2"></i>
+                        Asset tags must be unique
+                    </li>
+                    <li class="mb-2">
+                        <i class="fas fa-check text-success me-2"></i>
+                        Use the exact column headers from template
+                    </li>
+                    <li class="mb-2">
+                        <i class="fas fa-check text-success me-2"></i>
+                        Date format: YYYY-MM-DD
+                    </li>
+                    <li class="mb-2">
+                        <i class="fas fa-check text-success me-2"></i>
+                        Status: assigned, unassigned, maintenance, retired
+                    </li>
+                    <li class="mb-2">
+                        <i class="fas fa-check text-success me-2"></i>
+                        Condition: excellent, good, fair, poor
+                    </li>
+                    <li class="mb-0">
+                        <i class="fas fa-check text-success me-2"></i>
+                        Ownership: purchased, leased, rented
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row mt-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title mb-0">
+                    <i class="fas fa-table text-primary me-2"></i>CSV Format Example
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-sm table-bordered">
+                        <thead class="table-light">
+                            <tr>
+                                <th>asset_tag</th>
+                                <th>asset_type</th>
+                                <th>brand</th>
+                                <th>model</th>
+                                <th>serial_number</th>
+                                <th>status</th>
+                                <th>condition</th>
+                                <th>location</th>
+                                <th>purchase_date</th>
+                                <th>warranty_expiry</th>
+                                <th>cost</th>
+                                <th>ownership</th>
+                                <th>vendor</th>
+                                <th>notes</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>LAP001</td>
+                                <td>Laptop</td>
+                                <td>Dell</td>
+                                <td>Latitude 7420</td>
+                                <td>DL123456789</td>
+                                <td>assigned</td>
+                                <td>excellent</td>
+                                <td>Office Floor 1</td>
+                                <td>2024-01-15</td>
+                                <td>2027-01-15</td>
+                                <td>1200.00</td>
+                                <td>purchased</td>
+                                <td>Dell Technologies</td>
+                                <td>Sample laptop entry</td>
+                            </tr>
+                            <tr>
+                                <td>DSK001</td>
+                                <td>Desktop</td>
+                                <td>HP</td>
+                                <td>EliteDesk 800</td>
+                                <td>HP987654321</td>
+                                <td>unassigned</td>
+                                <td>good</td>
+                                <td>Storage Room</td>
+                                <td>2023-06-10</td>
+                                <td>2026-06-10</td>
+                                <td>800.00</td>
+                                <td>purchased</td>
+                                <td>HP Inc.</td>
+                                <td>Sample desktop entry</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
