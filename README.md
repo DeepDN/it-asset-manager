@@ -110,19 +110,18 @@ nano .env  # Edit with your settings
 git clone https://github.com/DeepDN/it-asset-manager.git
 cd it-asset-manager
 
-# Setup virtual environment
-python3 -m venv venv
-source venv/bin/activate  # On Windows: venv\Scripts\activate
+# Automated setup
+chmod +x setup.sh && ./setup.sh
 
-# Install dependencies
-pip install -r requirements.txt
-
-# Run application
-python app.py
+# Start application
+source venv/bin/activate && python app.py
 
 # Access: http://localhost:5000
 # Username: admin | Password: admin123
 ```
+
+**Having issues with local installation?** 
+📖 **See detailed guide:** [LOCAL_INSTALLATION_GUIDE.md](LOCAL_INSTALLATION_GUIDE.md)
 
 ---
 
