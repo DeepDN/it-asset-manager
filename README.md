@@ -61,39 +61,124 @@
 
 ## 🚀 **Quick Start**
 
-### **Prerequisites**
-- Python 3.7 or higher
-- pip (Python package installer)
-- Git (for cloning the repository)
+### **🎯 One-Command Deployment**
 
-### **Installation**
-
-1. **Clone the Repository**
-   ```bash
-   git clone https://github.com/deepaknemade/it-asset-manager.git
-   cd it-asset-manager
-   ```
-
-2. **Run Setup Script**
-   ```bash
-   chmod +x setup.sh
-   ./setup.sh
-   ```
-
-3. **Start the Application**
-   ```bash
-   source venv/bin/activate
-   python run.py
-   ```
-
-4. **Access the Application**
-   - **URL**: http://localhost:5000
-   - **Username**: `admin`
-   - **Password**: `admin123`
-
-### **Add Sample Data (Optional)**
+#### **🐳 Docker Deployment (Recommended)**
 ```bash
+# Clone and start with our automated script
+git clone https://github.com/deepaknemade/it-asset-manager.git
+cd it-asset-manager
+
+# Development environment
+./docker-start.sh dev
+
+# Production environment
+./docker-start.sh prod
+
+# Access application
+# Development: http://localhost:5000
+# Production: http://localhost (HTTP) or https://localhost (HTTPS)
+# Username: admin | Password: admin123
+```
+
+#### **☁️ AWS EC2 Deployment**
+```bash
+# 1. Launch EC2 instance (Ubuntu 22.04, t3.small recommended)
+# 2. SSH into instance and run:
+
+# Install Docker
+curl -fsSL https://get.docker.com -o get-docker.sh && sudo sh get-docker.sh
+sudo usermod -aG docker ubuntu && newgrp docker
+
+# Deploy application
+git clone https://github.com/deepaknemade/it-asset-manager.git
+cd it-asset-manager
+./docker-start.sh prod
+
+# Access via: http://YOUR_EC2_PUBLIC_IP
+```
+
+#### **💻 Local Development (Python)**
+```bash
+# Prerequisites: Python 3.7+, pip, Git
+git clone https://github.com/deepaknemade/it-asset-manager.git
+cd it-asset-manager
+
+# Automated setup
+chmod +x setup.sh && ./setup.sh
+
+# Start application
+source venv/bin/activate && python run.py
+
+# Access: http://localhost:5000
+# Username: admin | Password: admin123
+```
+
+### **🎲 Add Sample Data (Optional)**
+```bash
+# For Docker
+docker-compose exec app python add_sample_data.py
+
+# For local installation
 python add_sample_data.py
+```
+
+---
+
+## 📚 **Comprehensive Deployment Guides**
+
+### **🐳 Docker Deployment**
+For detailed Docker deployment instructions, see **[DOCKER_DEPLOYMENT.md](DOCKER_DEPLOYMENT.md)**
+
+**Quick Docker Commands:**
+```bash
+# Development Environment
+docker-compose up -d --build
+
+# Production Environment
+docker-compose -f docker-compose.prod.yml up -d --build
+
+# View logs
+docker-compose logs -f app
+
+# Stop services
+docker-compose down
+```
+
+### **☁️ AWS EC2 Deployment**
+For complete AWS EC2 deployment guide, see **[AWS_DEPLOYMENT.md](AWS_DEPLOYMENT.md)**
+
+**Quick AWS Setup:**
+```bash
+# 1. Launch EC2 instance (Ubuntu 22.04, t3.small recommended)
+# 2. Configure security groups (ports 22, 80, 443)
+# 3. SSH into instance and run:
+
+sudo apt update && sudo apt upgrade -y
+curl -fsSL https://get.docker.com -o get-docker.sh && sudo sh get-docker.sh
+sudo usermod -aG docker ubuntu && newgrp docker
+
+git clone https://github.com/deepaknemade/it-asset-manager.git
+cd it-asset-manager
+cp .env.example .env
+# Edit .env with production settings
+
+docker-compose -f docker-compose.prod.yml up -d --build
+```
+
+### **🔒 SSL/HTTPS Setup**
+```bash
+# For Let's Encrypt (production)
+sudo apt install certbot
+sudo certbot certonly --standalone -d your-domain.com
+sudo cp /etc/letsencrypt/live/your-domain.com/fullchain.pem docker/nginx/ssl/cert.pem
+sudo cp /etc/letsencrypt/live/your-domain.com/privkey.pem docker/nginx/ssl/key.pem
+
+# For self-signed (development)
+mkdir -p docker/nginx/ssl
+openssl req -x509 -nodes -days 365 -newkey rsa:2048 \
+  -keyout docker/nginx/ssl/key.pem \
+  -out docker/nginx/ssl/cert.pem
 ```
 
 ---
