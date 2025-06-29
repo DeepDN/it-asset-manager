@@ -12,7 +12,7 @@
 
 1. **Clone the Repository**
    ```bash
-   git clone https://github.com/deepaknemade/it-asset-manager.git
+   git clone https://github.com/DeepDN/it-asset-manager.git
    cd it-asset-manager
    ```
 

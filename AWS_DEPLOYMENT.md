@@ -139,7 +139,7 @@ sudo ufw status
 ### **3.1 Clone and Setup Application**
 ```bash
 # Clone repository
-git clone https://github.com/deepaknemade/it-asset-manager.git
+git clone https://github.com/DeepDN/it-asset-manager.git
 cd it-asset-manager
 
 # Create necessary directories
@@ -645,7 +645,7 @@ aws elbv2 create-load-balancer \
 - **AWS Forums**: [AWS Developer Forums](https://forums.aws.amazon.com/)
 
 ### **Application Support**
-- **GitHub Issues**: [Create an issue](https://github.com/deepaknemade/it-asset-manager/issues)
+- **GitHub Issues**: [Create an issue](https://github.com/DeepDN/it-asset-manager/issues)
 - **Documentation**: Check README.md and other guides
 - **Author**: [Deepak Nemade on LinkedIn](https://www.linkedin.com/in/deepak-nemade/)
 

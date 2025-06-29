@@ -40,13 +40,18 @@ check_docker() {
         exit 1
     fi
     
-    if ! command -v docker-compose &> /dev/null; then
+    # Check for docker compose (new version) or docker-compose (old version)
+    if command -v docker &> /dev/null && docker compose version &> /dev/null; then
+        DOCKER_COMPOSE_CMD="docker compose"
+        print_success "Docker and Docker Compose (new version) are installed"
+    elif command -v docker-compose &> /dev/null; then
+        DOCKER_COMPOSE_CMD="docker-compose"
+        print_success "Docker and Docker Compose (legacy version) are installed"
+    else
         print_error "Docker Compose is not installed. Please install Docker Compose first."
         echo "Visit: https://docs.docker.com/compose/install/"
         exit 1
     fi
-    
-    print_success "Docker and Docker Compose are installed"
 }
 
 # Create necessary directories
@@ -85,7 +90,7 @@ generate_ssl() {
 # Start development environment
 start_development() {
     print_status "Starting development environment..."
-    docker-compose up --build -d
+    $DOCKER_COMPOSE_CMD up --build -d
     
     # Wait for containers to be ready
     print_status "Waiting for containers to be ready..."
@@ -101,12 +106,12 @@ start_development() {
         echo "   🔑 Password: admin123"
         echo ""
         echo "📊 Useful commands:"
-        echo "   View logs: docker-compose logs -f"
-        echo "   Stop: docker-compose down"
-        echo "   Add sample data: docker-compose exec app python add_sample_data.py"
+        echo "   View logs: $DOCKER_COMPOSE_CMD logs -f"
+        echo "   Stop: $DOCKER_COMPOSE_CMD down"
+        echo "   Add sample data: $DOCKER_COMPOSE_CMD exec app python add_sample_data.py"
     else
         print_error "Failed to start development environment"
-        echo "Check logs with: docker-compose logs"
+        echo "Check logs with: $DOCKER_COMPOSE_CMD logs"
         exit 1
     fi
 }
@@ -114,7 +119,7 @@ start_development() {
 # Start production environment
 start_production() {
     print_status "Starting production environment..."
-    docker-compose -f docker-compose.prod.yml up --build -d
+    $DOCKER_COMPOSE_CMD -f docker-compose.prod.yml up --build -d
     
     # Wait for containers to be ready
     print_status "Waiting for containers to be ready..."
@@ -132,12 +137,12 @@ start_production() {
         echo "   🔑 Password: Check your .env file for ADMIN_PASSWORD"
         echo ""
         echo "📊 Useful commands:"
-        echo "   View logs: docker-compose -f docker-compose.prod.yml logs -f"
-        echo "   Stop: docker-compose -f docker-compose.prod.yml down"
-        echo "   Add sample data: docker-compose -f docker-compose.prod.yml exec app python add_sample_data.py"
+        echo "   View logs: $DOCKER_COMPOSE_CMD -f docker-compose.prod.yml logs -f"
+        echo "   Stop: $DOCKER_COMPOSE_CMD -f docker-compose.prod.yml down"
+        echo "   Add sample data: $DOCKER_COMPOSE_CMD -f docker-compose.prod.yml exec app python add_sample_data.py"
     else
         print_error "Failed to start production environment"
-        echo "Check logs with: docker-compose -f docker-compose.prod.yml logs"
+        echo "Check logs with: $DOCKER_COMPOSE_CMD -f docker-compose.prod.yml logs"
         exit 1
     fi
 }
@@ -166,8 +171,8 @@ show_help() {
 # Stop containers
 stop_containers() {
     print_status "Stopping containers..."
-    docker-compose down 2>/dev/null || true
-    docker-compose -f docker-compose.prod.yml down 2>/dev/null || true
+    $DOCKER_COMPOSE_CMD down 2>/dev/null || true
+    $DOCKER_COMPOSE_CMD -f docker-compose.prod.yml down 2>/dev/null || true
     print_success "Containers stopped"
 }
 
@@ -185,18 +190,18 @@ restart_containers() {
 
 # Show logs
 show_logs() {
-    if docker-compose ps | grep -q "it-asset-manager-prod"; then
-        docker-compose -f docker-compose.prod.yml logs -f
+    if $DOCKER_COMPOSE_CMD ps | grep -q "it-asset-manager-prod"; then
+        $DOCKER_COMPOSE_CMD -f docker-compose.prod.yml logs -f
     else
-        docker-compose logs -f
+        $DOCKER_COMPOSE_CMD logs -f
     fi
 }
 
 # Show status
 show_status() {
     print_status "Container status:"
-    docker-compose ps 2>/dev/null || true
-    docker-compose -f docker-compose.prod.yml ps 2>/dev/null || true
+    $DOCKER_COMPOSE_CMD ps 2>/dev/null || true
+    $DOCKER_COMPOSE_CMD -f docker-compose.prod.yml ps 2>/dev/null || true
 }
 
 # Clean up
@@ -205,8 +210,8 @@ clean_up() {
     read -r response
     if [[ "$response" =~ ^([yY][eE][sS]|[yY])$ ]]; then
         print_status "Cleaning up..."
-        docker-compose down -v --remove-orphans 2>/dev/null || true
-        docker-compose -f docker-compose.prod.yml down -v --remove-orphans 2>/dev/null || true
+        $DOCKER_COMPOSE_CMD down -v --remove-orphans 2>/dev/null || true
+        $DOCKER_COMPOSE_CMD -f docker-compose.prod.yml down -v --remove-orphans 2>/dev/null || true
         docker system prune -f
         print_success "Cleanup completed"
     else

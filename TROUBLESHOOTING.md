@@ -471,7 +471,7 @@ Include the following information:
 - System resource usage
 
 ### **Support Channels**
-- **GitHub Issues**: [Create an issue](https://github.com/deepaknemade/it-asset-manager/issues)
+- **GitHub Issues**: [Create an issue](https://github.com/DeepDN/it-asset-manager/issues)
 - **Documentation**: Check README.md and deployment guides
 - **Author**: [Deepak Nemade on LinkedIn](https://www.linkedin.com/in/deepak-nemade/)
 
