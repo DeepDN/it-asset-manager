@@ -45,27 +45,36 @@
 
 ### **🐳 Docker Deployment (Recommended)**
 
-#### **Development Environment**
+#### **Production Environment**
 ```bash
 # Clone repository
 git clone https://github.com/DeepDN/it-asset-manager.git
 cd it-asset-manager
 
-# Start development environment
-./docker-start.sh dev
+# Configure environment
+cp .env.example .env
+nano .env  # Edit with your production settings
+
+# Start production environment with Nginx
+./docker-start.sh prod
+
+# Access: http://localhost
+# Username: admin | Password: admin123 (CHANGE IMMEDIATELY)
+```
+
+📖 **Production Guide**: [PRODUCTION_DEPLOYMENT.md](PRODUCTION_DEPLOYMENT.md)
+
+#### **Development Environment**
+```bash
+# For developers and contributors
+git checkout dev
+./dev-setup.sh
 
 # Access: http://localhost:5000
 # Username: admin | Password: admin123
 ```
 
-#### **Production Environment**
-```bash
-# Start production environment with Nginx
-./docker-start.sh prod
-
-# Access: http://localhost
-# Username: admin | Password: admin123
-```
+📖 **Development Guide**: [CONTRIBUTING.md](CONTRIBUTING.md)
 
 ### **☁️ AWS EC2 Deployment**
 
