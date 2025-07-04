@@ -1,0 +1,80 @@
+version: '3.9'
+
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: development
+    container_name: it-asset-manager-dev
+    ports:
+      - "5000:5000"
+    environment:
+      - FLASK_ENV=development
+      - FLASK_DEBUG=1
+      - SECRET_KEY=dev-secret-key-change-in-production
+      - SQLALCHEMY_DATABASE_URI=sqlite:///instance/it_assets.db
+    volumes:
+      - .:/app
+      - sqlite_data:/app/instance
+      - ./logs:/app/logs
+      - ./uploads:/app/uploads
+    networks:
+      - it-asset-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5000/"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  # Development database (optional PostgreSQL for testing)
+  postgres-dev:
+    image: postgres:15-alpine
+    container_name: it-asset-manager-postgres-dev
+    environment:
+      - POSTGRES_DB=it_assets_dev
+      - POSTGRES_USER=dev_user
+      - POSTGRES_PASSWORD=dev_password
+    volumes:
+      - postgres_dev_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    networks:
+      - it-asset-network
+    profiles:
+      - postgres
+
+  # Development Redis (for future caching/sessions)
+  redis-dev:
+    image: redis:7-alpine
+    container_name: it-asset-manager-redis-dev
+    ports:
+      - "6379:6379"
+    networks:
+      - it-asset-network
+    profiles:
+      - redis
+
+  # Development tools container
+  dev-tools:
+    build:
+      context: .
+      dockerfile: Dockerfile.dev-tools
+    container_name: it-asset-manager-dev-tools
+    volumes:
+      - .:/app
+    networks:
+      - it-asset-network
+    profiles:
+      - tools
+    command: tail -f /dev/null
+
+volumes:
+  sqlite_data:
+  postgres_dev_data:
+
+networks:
+  it-asset-network:
+    driver: bridge
