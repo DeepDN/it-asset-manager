@@ -121,7 +121,7 @@ source venv/bin/activate && python app.py
 ```
 
 **Having issues with local installation?** 
-📖 **See detailed guide:** [LOCAL_INSTALLATION_GUIDE.md](LOCAL_INSTALLATION_GUIDE.md)
+📖 **See detailed guide:** [docs/deployment/LOCAL_INSTALLATION_GUIDE.md](docs/deployment/LOCAL_INSTALLATION_GUIDE.md)
 
 ---
 
@@ -331,6 +331,59 @@ tar czf it-asset-manager-backup-$(date +%Y%m%d).tar.gz \
 
 ---
 
+## 🤝 **Contributing**
+
+We welcome contributions from the community! IT Asset Manager is built by IT professionals, for IT professionals.
+
+### **Quick Start for Contributors**
+1. **Read our [Contributing Guidelines](CONTRIBUTING.md)**
+2. **Check our [Code of Conduct](CODE_OF_CONDUCT.md)**
+3. **Browse [open issues](https://github.com/DeepDN/it-asset-manager/issues)**
+4. **Join [GitHub Discussions](https://github.com/DeepDN/it-asset-manager/discussions)**
+
+### **Ways to Contribute**
+- 🐛 **Report bugs** using our [bug report template](.github/ISSUE_TEMPLATE/bug_report.yml)
+- 💡 **Suggest features** using our [feature request template](.github/ISSUE_TEMPLATE/feature_request.yml)
+- 📚 **Improve documentation** 
+- 🔧 **Submit code improvements**
+- 🧪 **Help with testing**
+- 🌍 **Translate to other languages**
+
+### **Development Setup**
+```bash
+# Fork the repository and clone your fork
+git clone https://github.com/YOUR_USERNAME/it-asset-manager.git
+cd it-asset-manager
+
+# Start development environment
+./docker-start.sh dev
+
+# Make your changes and submit a pull request!
+```
+
+---
+
+## 🔒 **Security**
+
+Security is a top priority for IT Asset Manager. We follow industry best practices and welcome security research.
+
+### **Reporting Security Issues**
+**🚨 Please DO NOT create public issues for security vulnerabilities.**
+
+Instead, email us at: **[security@itassetmanager.com](mailto:security@itassetmanager.com)**
+
+### **Security Features**
+- 🔐 Secure password hashing (PBKDF2)
+- 🛡️ CSRF protection
+- 🔒 Session security
+- ✅ Input validation
+- 🚫 SQL injection prevention
+- 🌐 XSS protection
+
+📖 **Read our full [Security Policy](SECURITY.md)**
+
+---
+
 ## 📞 **Support & Contact**
 
 ### **Professional Support**
@@ -340,8 +393,9 @@ tar czf it-asset-manager-backup-$(date +%Y%m%d).tar.gz \
 
 ### **Community Support**
 - **GitHub Issues**: [Report bugs or request features](https://github.com/DeepDN/it-asset-manager/issues)
-- **Documentation**: Comprehensive guides included
-- **Troubleshooting**: Built-in help and error resolution
+- **GitHub Discussions**: [Community questions and support](https://github.com/DeepDN/it-asset-manager/discussions)
+- **Documentation**: [Comprehensive guides](docs/)
+- **Troubleshooting**: [Common issues and solutions](docs/guides/TROUBLESHOOTING.md)
 
 ---
 

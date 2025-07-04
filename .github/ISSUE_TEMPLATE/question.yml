@@ -1,0 +1,197 @@
+name: ❓ Question / Support
+description: Ask a question or get help with IT Asset Manager
+title: "[QUESTION] "
+labels: ["question", "support"]
+assignees: ["DeepDN"]
+
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Need help with IT Asset Manager? We're here to assist! Please provide as much detail as possible so we can help you quickly.
+
+  - type: checkboxes
+    id: prerequisites
+    attributes:
+      label: Prerequisites
+      description: Please confirm you have completed the following
+      options:
+        - label: I have searched existing issues and discussions
+          required: true
+        - label: I have read the relevant documentation
+          required: true
+        - label: I have checked the troubleshooting guide
+          required: true
+
+  - type: dropdown
+    id: question-category
+    attributes:
+      label: Question Category
+      description: What category does your question fall into?
+      options:
+        - Installation & Setup
+        - Configuration
+        - Usage & Features
+        - Deployment (Docker)
+        - Deployment (AWS/Cloud)
+        - Troubleshooting
+        - Performance
+        - Security
+        - Integration
+        - Best Practices
+        - Other
+    validations:
+      required: true
+
+  - type: textarea
+    id: question
+    attributes:
+      label: Your Question
+      description: What would you like to know?
+      placeholder: |
+        Please ask your question clearly and provide context:
+        
+        - What are you trying to accomplish?
+        - What specific issue are you facing?
+        - What have you already tried?
+    validations:
+      required: true
+
+  - type: textarea
+    id: context
+    attributes:
+      label: Context & Background
+      description: Provide context about your situation
+      placeholder: |
+        Help us understand your situation:
+        
+        - What is your role? (IT Admin, System Admin, etc.)
+        - How are you using IT Asset Manager?
+        - What is your environment like?
+        - Any specific requirements or constraints?
+
+  - type: dropdown
+    id: deployment-method
+    attributes:
+      label: Deployment Method
+      description: How are you running IT Asset Manager?
+      options:
+        - Docker (Development)
+        - Docker (Production)
+        - Local Python Installation
+        - AWS EC2
+        - Other Cloud Provider
+        - Planning to deploy (not yet deployed)
+        - Other (please specify below)
+
+  - type: input
+    id: version
+    attributes:
+      label: Version
+      description: What version are you using? (if applicable)
+      placeholder: e.g., v2.1.0, latest, commit hash
+
+  - type: dropdown
+    id: operating-system
+    attributes:
+      label: Operating System
+      description: What operating system are you using?
+      options:
+        - Ubuntu 20.04
+        - Ubuntu 22.04
+        - CentOS/RHEL 7
+        - CentOS/RHEL 8
+        - Amazon Linux 2
+        - macOS
+        - Windows 10
+        - Windows 11
+        - Other (please specify below)
+
+  - type: textarea
+    id: what-tried
+    attributes:
+      label: What Have You Tried?
+      description: What steps have you already taken to solve this?
+      placeholder: |
+        List what you've already attempted:
+        
+        - Documentation sections you've read
+        - Commands you've run
+        - Configuration changes you've made
+        - Error messages you've encountered
+
+  - type: textarea
+    id: expected-outcome
+    attributes:
+      label: Expected Outcome
+      description: What are you hoping to achieve?
+      placeholder: |
+        Describe your goal:
+        
+        - What should happen when everything works correctly?
+        - What is the end result you're looking for?
+
+  - type: textarea
+    id: error-messages
+    attributes:
+      label: Error Messages or Logs
+      description: Include any relevant error messages or log output
+      placeholder: |
+        Paste any error messages or relevant log entries:
+        
+        ```
+        [Error messages or log output here]
+        ```
+      render: shell
+
+  - type: textarea
+    id: configuration
+    attributes:
+      label: Configuration Details
+      description: Share relevant configuration (remove sensitive information)
+      placeholder: |
+        Include relevant configuration details:
+        
+        - Environment variables (remove secrets)
+        - Docker compose settings
+        - Network configuration
+        - Database settings
+        - Any custom modifications
+
+  - type: dropdown
+    id: urgency
+    attributes:
+      label: Urgency
+      description: How urgent is this question?
+      options:
+        - Critical (Production system down)
+        - High (Blocking important work)
+        - Medium (Need answer soon)
+        - Low (General inquiry)
+    validations:
+      required: true
+
+  - type: textarea
+    id: additional-info
+    attributes:
+      label: Additional Information
+      description: Any other details that might be helpful
+      placeholder: |
+        Include any other relevant information:
+        
+        - Screenshots (if helpful)
+        - Network diagrams
+        - Asset inventory size
+        - Number of users
+        - Specific use cases
+        - Timeline constraints
+
+  - type: checkboxes
+    id: follow-up
+    attributes:
+      label: Follow-up
+      options:
+        - label: I can provide additional information if needed
+        - label: I can test suggested solutions
+        - label: I'm available for real-time troubleshooting if needed
+        - label: This question might help other users (consider adding to FAQ)

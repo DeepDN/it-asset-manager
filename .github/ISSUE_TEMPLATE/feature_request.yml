@@ -1,0 +1,220 @@
+name: 💡 Feature Request
+description: Suggest a new feature or enhancement
+title: "[FEATURE] "
+labels: ["enhancement", "needs-triage"]
+assignees: ["DeepDN"]
+
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thank you for suggesting a new feature! Your ideas help make IT Asset Manager better for everyone.
+
+  - type: checkboxes
+    id: prerequisites
+    attributes:
+      label: Prerequisites
+      description: Please confirm you have completed the following
+      options:
+        - label: I have searched existing issues and feature requests
+          required: true
+        - label: I have checked the project roadmap and documentation
+          required: true
+        - label: This feature would benefit the broader IT Asset Manager community
+          required: true
+
+  - type: textarea
+    id: feature-summary
+    attributes:
+      label: Feature Summary
+      description: A clear and concise description of the feature you'd like to see
+      placeholder: Briefly describe the feature...
+    validations:
+      required: true
+
+  - type: dropdown
+    id: feature-category
+    attributes:
+      label: Feature Category
+      description: What category does this feature fall into?
+      options:
+        - Asset Management
+        - User Interface/Experience
+        - Reporting & Analytics
+        - Import/Export
+        - Authentication & Security
+        - API & Integrations
+        - Mobile Support
+        - Performance
+        - Documentation
+        - Other
+    validations:
+      required: true
+
+  - type: textarea
+    id: problem-statement
+    attributes:
+      label: Problem Statement
+      description: What problem does this feature solve? What pain point does it address?
+      placeholder: |
+        Describe the problem or limitation you're experiencing...
+        
+        Example: "As an IT administrator, I need to..."
+    validations:
+      required: true
+
+  - type: textarea
+    id: proposed-solution
+    attributes:
+      label: Proposed Solution
+      description: Describe your ideal solution to the problem
+      placeholder: |
+        Describe how you envision this feature working...
+        
+        Include:
+        - User interface mockups or descriptions
+        - Workflow or process changes
+        - Technical implementation ideas (if any)
+    validations:
+      required: true
+
+  - type: textarea
+    id: use-cases
+    attributes:
+      label: Use Cases
+      description: Provide specific examples of how this feature would be used
+      placeholder: |
+        Example use cases:
+        
+        1. Use Case 1: [Describe scenario]
+           - User: [Type of user]
+           - Goal: [What they want to achieve]
+           - Steps: [How they would use the feature]
+        
+        2. Use Case 2: [Describe scenario]
+           - User: [Type of user]
+           - Goal: [What they want to achieve]
+           - Steps: [How they would use the feature]
+    validations:
+      required: true
+
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternative Solutions
+      description: Have you considered any alternative solutions or workarounds?
+      placeholder: |
+        Describe any alternative approaches you've considered:
+        - Current workarounds you're using
+        - Other tools or methods that solve similar problems
+        - Why those alternatives aren't sufficient
+
+  - type: dropdown
+    id: priority
+    attributes:
+      label: Priority
+      description: How important is this feature to you?
+      options:
+        - Critical (Blocking current workflow)
+        - High (Would significantly improve workflow)
+        - Medium (Nice to have improvement)
+        - Low (Minor enhancement)
+    validations:
+      required: true
+
+  - type: dropdown
+    id: user-type
+    attributes:
+      label: User Type
+      description: What type of user would primarily benefit from this feature?
+      options:
+        - IT Administrator
+        - System Administrator
+        - Network Administrator
+        - Help Desk Technician
+        - Asset Manager
+        - End User
+        - All Users
+        - Other (specify in additional context)
+    validations:
+      required: true
+
+  - type: textarea
+    id: acceptance-criteria
+    attributes:
+      label: Acceptance Criteria
+      description: What would need to be true for this feature to be considered complete?
+      placeholder: |
+        Define the criteria that would make this feature complete:
+        
+        - [ ] Criterion 1
+        - [ ] Criterion 2
+        - [ ] Criterion 3
+        
+        Example:
+        - [ ] Users can upload CSV files with asset data
+        - [ ] System validates CSV format and data
+        - [ ] Import progress is displayed to user
+        - [ ] Errors are clearly reported with line numbers
+
+  - type: textarea
+    id: mockups-wireframes
+    attributes:
+      label: Mockups or Wireframes
+      description: If you have any visual ideas, please share them here
+      placeholder: |
+        Attach or describe any visual concepts:
+        - Screenshots from other applications
+        - Hand-drawn sketches
+        - Wireframes or mockups
+        - Links to similar implementations
+
+  - type: textarea
+    id: technical-considerations
+    attributes:
+      label: Technical Considerations
+      description: Any technical aspects to consider? (Optional - for technical users)
+      placeholder: |
+        If you have technical background, consider:
+        - Database schema changes needed
+        - API endpoints required
+        - Performance implications
+        - Security considerations
+        - Third-party integrations
+
+  - type: checkboxes
+    id: implementation-help
+    attributes:
+      label: Implementation
+      options:
+        - label: I would be willing to help implement this feature
+        - label: I can provide testing and feedback during development
+        - label: I can help with documentation for this feature
+        - label: I have domain expertise that could help with implementation
+
+  - type: textarea
+    id: additional-context
+    attributes:
+      label: Additional Context
+      description: Add any other context, links, or examples about the feature request
+      placeholder: |
+        Additional information:
+        - Links to similar features in other tools
+        - Industry standards or best practices
+        - Regulatory or compliance requirements
+        - Integration requirements
+        - Anything else that might be helpful
+
+  - type: dropdown
+    id: timeline
+    attributes:
+      label: Desired Timeline
+      description: When would you ideally like to see this feature?
+      options:
+        - ASAP (Critical need)
+        - Next release (1-2 months)
+        - Within 6 months
+        - Within 1 year
+        - No specific timeline
+    validations:
+      required: true

@@ -1,0 +1,17 @@
+blank_issues_enabled: false
+contact_links:
+  - name: 🔒 Security Vulnerability
+    url: mailto:security@itassetmanager.com
+    about: Please report security vulnerabilities via email, not GitHub issues
+  - name: 💬 GitHub Discussions
+    url: https://github.com/DeepDN/it-asset-manager/discussions
+    about: Ask questions and discuss ideas with the community
+  - name: 📖 Documentation
+    url: https://github.com/DeepDN/it-asset-manager#readme
+    about: Read the comprehensive documentation and guides
+  - name: 🔧 Troubleshooting Guide
+    url: https://github.com/DeepDN/it-asset-manager/blob/main/TROUBLESHOOTING.md
+    about: Check common issues and solutions
+  - name: 👨‍💻 Contact Maintainer
+    url: https://www.linkedin.com/in/deepak-nemade/
+    about: Connect with Deepak Nemade on LinkedIn for professional inquiries

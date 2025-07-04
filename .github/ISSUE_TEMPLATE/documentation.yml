@@ -1,0 +1,160 @@
+name: 📚 Documentation Issue
+description: Report issues with documentation or request documentation improvements
+title: "[DOCS] "
+labels: ["documentation", "needs-triage"]
+assignees: ["DeepDN"]
+
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thank you for helping improve our documentation! Clear documentation helps everyone use IT Asset Manager more effectively.
+
+  - type: dropdown
+    id: doc-type
+    attributes:
+      label: Documentation Type
+      description: What type of documentation issue is this?
+      options:
+        - Missing Documentation
+        - Incorrect Information
+        - Outdated Information
+        - Unclear Instructions
+        - Broken Links
+        - Formatting Issues
+        - Translation Request
+        - New Documentation Request
+    validations:
+      required: true
+
+  - type: dropdown
+    id: doc-section
+    attributes:
+      label: Documentation Section
+      description: Which section of documentation is affected?
+      options:
+        - README.md
+        - Installation Guide
+        - Deployment Guide (Docker)
+        - Deployment Guide (AWS)
+        - Local Installation Guide
+        - Troubleshooting Guide
+        - API Documentation
+        - Contributing Guidelines
+        - Security Policy
+        - Code Comments
+        - Other (specify below)
+    validations:
+      required: true
+
+  - type: input
+    id: doc-location
+    attributes:
+      label: Specific Location
+      description: Provide the specific file path, section, or URL where the issue exists
+      placeholder: e.g., README.md line 45, docs/installation.md section "Docker Setup"
+    validations:
+      required: true
+
+  - type: textarea
+    id: issue-description
+    attributes:
+      label: Issue Description
+      description: Clearly describe the documentation issue
+      placeholder: |
+        Describe the problem with the current documentation:
+        - What is missing, incorrect, or unclear?
+        - What confusion does this cause?
+        - How does this impact users?
+    validations:
+      required: true
+
+  - type: textarea
+    id: current-content
+    attributes:
+      label: Current Content (if applicable)
+      description: Quote the current documentation that has issues
+      placeholder: |
+        Copy and paste the current text that needs to be fixed:
+        
+        ```
+        [Current documentation text here]
+        ```
+      render: markdown
+
+  - type: textarea
+    id: suggested-improvement
+    attributes:
+      label: Suggested Improvement
+      description: How should the documentation be improved?
+      placeholder: |
+        Provide your suggested changes:
+        
+        ```
+        [Suggested new or corrected text here]
+        ```
+        
+        Or describe what information should be added/changed.
+      render: markdown
+
+  - type: dropdown
+    id: user-level
+    attributes:
+      label: Target User Level
+      description: What level of user is primarily affected by this documentation issue?
+      options:
+        - Beginner (New to IT Asset Manager)
+        - Intermediate (Some experience)
+        - Advanced (Experienced users)
+        - Developer (Contributing to project)
+        - All Users
+    validations:
+      required: true
+
+  - type: textarea
+    id: user-impact
+    attributes:
+      label: User Impact
+      description: How does this documentation issue affect users?
+      placeholder: |
+        Describe the impact:
+        - What problems do users encounter?
+        - How much time does this waste?
+        - What errors or confusion result?
+        - How many users are likely affected?
+
+  - type: textarea
+    id: context
+    attributes:
+      label: Additional Context
+      description: Provide any additional context that might be helpful
+      placeholder: |
+        Additional information:
+        - Your experience level with IT Asset Manager
+        - What you were trying to accomplish
+        - Environment details (if relevant)
+        - Screenshots of confusing sections
+        - Links to related issues or discussions
+
+  - type: checkboxes
+    id: help-offer
+    attributes:
+      label: Contribution
+      options:
+        - label: I can help write or improve this documentation
+        - label: I can review proposed changes
+        - label: I can provide screenshots or examples
+        - label: I can test the improved documentation
+
+  - type: dropdown
+    id: priority
+    attributes:
+      label: Priority
+      description: How important is fixing this documentation issue?
+      options:
+        - Critical (Blocks users from basic functionality)
+        - High (Causes significant confusion)
+        - Medium (Improvement would be helpful)
+        - Low (Minor enhancement)
+    validations:
+      required: true
