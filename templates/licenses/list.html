@@ -1,0 +1,145 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="page-header">
+    <div class="d-flex justify-content-between align-items-center">
+        <div>
+            <h1 class="mb-2"><i class="fas fa-key me-3"></i>Software Licenses</h1>
+            <p class="text-muted mb-0">Manage and track software license inventory and assignments</p>
+        </div>
+        <div>
+            <a href="{{ url_for('licenses.add_license') }}" class="btn btn-primary">
+                <i class="fas fa-plus me-2"></i>Add License
+            </a>
+        </div>
+    </div>
+</div>
+
+<!-- License Stats -->
+<div class="row mb-4">
+    <div class="col-md-3">
+        <div class="card stat-card stat-blue">
+            <h6>Total Licenses</h6>
+            <div class="number">{{ licenses|length }}</div>
+            <i class="fas fa-key stat-icon"></i>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card stat-card stat-green">
+            <h6>Active</h6>
+            <div class="number">{{ licenses|selectattr("status", "equalto", "active")|list|length }}</div>
+            <i class="fas fa-check-circle stat-icon"></i>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card stat-card stat-orange">
+            <h6>Total Seats</h6>
+            <div class="number">{{ licenses|sum(attribute="total_seats") }}</div>
+            <i class="fas fa-users stat-icon"></i>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card stat-card stat-red">
+            <h6>Expired</h6>
+            <div class="number">{{ licenses|selectattr("status", "equalto", "expired")|list|length }}</div>
+            <i class="fas fa-exclamation-triangle stat-icon"></i>
+        </div>
+    </div>
+</div>
+
+<!-- Licenses Table -->
+<div class="card">
+    <div class="card-header">
+        <h6 class="card-title mb-0">
+            <i class="fas fa-list text-primary me-2"></i>License Inventory
+        </h6>
+    </div>
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-hover mb-0">
+                <thead>
+                    <tr>
+                        <th>License Name</th>
+                        <th>Publisher</th>
+                        <th>Version</th>
+                        <th>Type</th>
+                        <th>Total Seats</th>
+                        <th>Assigned</th>
+                        <th>Available</th>
+                        <th>Expiration</th>
+                        <th>Status</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for lic in licenses %}
+                    <tr>
+                        <td>
+                            <div class="d-flex align-items-center">
+                                <i class="fas fa-certificate text-primary me-2"></i>
+                                <div>
+                                    <a href="{{ url_for('licenses.license_detail', id=lic.id) }}" class="text-decoration-none fw-bold">{{ lic.license_name }}</a>
+                                    {% if lic.license_key %}
+                                    <br><small class="text-muted">
+                                        <i class="fas fa-key me-1"></i>{{ lic.license_key[:20] }}{% if lic.license_key|length > 20 %}...{% endif %}
+                                    </small>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </td>
+                        <td>{{ lic.publisher or '—' }}</td>
+                        <td><span class="badge bg-secondary">{{ lic.version or '—' }}</span></td>
+                        <td><span class="badge bg-info">{{ lic.license_type.title() }}</span></td>
+                        <td class="text-center fw-bold">{{ lic.total_seats }}</td>
+                        <td class="text-center">{{ lic.assigned_seats }}</td>
+                        <td class="text-center">
+                            {% if lic.available_seats > 0 %}
+                            <span class="text-success fw-bold">{{ lic.available_seats }}</span>
+                            {% else %}
+                            <span class="text-danger fw-bold">{{ lic.available_seats }}</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if lic.expiration_date %}
+                            <small>{{ lic.expiration_date.strftime('%Y-%m-%d') }}</small>
+                            {% else %}
+                            <small class="text-muted">N/A</small>
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if lic.status == 'active' %}
+                            <span class="badge bg-success"><i class="fas fa-check me-1"></i>Active</span>
+                            {% elif lic.status == 'expired' %}
+                            <span class="badge bg-danger"><i class="fas fa-times me-1"></i>Expired</span>
+                            {% else %}
+                            <span class="badge bg-warning">{{ lic.status.title() }}</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <div class="btn-group" role="group">
+                                <a href="{{ url_for('licenses.edit_license', id=lic.id) }}" class="btn btn-sm btn-outline-primary" title="Edit License">
+                                    <i class="fas fa-edit"></i>
+                                </a>
+                                <a href="{{ url_for('licenses.license_detail', id=lic.id) }}" class="btn btn-sm btn-outline-info" title="View Details">
+                                    <i class="fas fa-eye"></i>
+                                </a>
+                            </div>
+                        </td>
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td colspan="10" class="text-center py-5">
+                            <div class="text-muted">
+                                <i class="fas fa-inbox fa-3x mb-3"></i>
+                                <h5>No licenses found</h5>
+                                <p><a href="{{ url_for('licenses.add_license') }}">Add your first license</a></p>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

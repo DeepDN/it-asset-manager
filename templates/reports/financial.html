@@ -1,0 +1,117 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="page-header">
+    <div class="d-flex justify-content-between align-items-center">
+        <div>
+            <h1 class="mb-2"><i class="fas fa-dollar-sign me-3"></i>Financial Report</h1>
+            <p class="text-muted mb-0">Overview of asset costs, leases, and depreciation</p>
+        </div>
+        <div>
+            <a href="{{ url_for('reports.executive_dashboard') }}" class="btn btn-outline-secondary">
+                <i class="fas fa-arrow-left me-2"></i>Back to Dashboard
+            </a>
+        </div>
+    </div>
+</div>
+
+<div class="row mb-4">
+    <div class="col-md-4 mb-3">
+        <div class="stat-card stat-blue">
+            <div class="stat-icon"><i class="fas fa-shopping-cart"></i></div>
+            <h6>Total Purchase Value</h6>
+            <div class="number">${{ "%.2f"|format(data.total_purchase_value) }}</div>
+        </div>
+    </div>
+    <div class="col-md-4 mb-3">
+        <div class="stat-card stat-orange">
+            <div class="stat-icon"><i class="fas fa-calendar-alt"></i></div>
+            <h6>Monthly Lease Cost</h6>
+            <div class="number">${{ "%.2f"|format(data.monthly_lease_cost) }}</div>
+        </div>
+    </div>
+    <div class="col-md-4 mb-3">
+        <div class="stat-card stat-green">
+            <div class="stat-icon"><i class="fas fa-boxes"></i></div>
+            <h6>Assets with Cost</h6>
+            <div class="number">{{ data.assets_with_cost }}</div>
+        </div>
+    </div>
+</div>
+
+{% if data.depreciation %}
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h6 class="card-title mb-0"><i class="fas fa-chart-line text-warning me-2"></i>Depreciation Summary</h6>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-4 mb-3">
+                        <div class="card bg-light border-0">
+                            <div class="card-body text-center">
+                                <i class="fas fa-dollar-sign fa-2x text-primary mb-2"></i>
+                                <h5>${{ "%.2f"|format(data.depreciation.total_purchase_cost) }}</h5>
+                                <small class="text-muted">Total Purchase Cost</small>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4 mb-3">
+                        <div class="card bg-light border-0">
+                            <div class="card-body text-center">
+                                <i class="fas fa-book fa-2x text-success mb-2"></i>
+                                <h5>${{ "%.2f"|format(data.depreciation.total_book_value) }}</h5>
+                                <small class="text-muted">Total Book Value</small>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4 mb-3">
+                        <div class="card bg-light border-0">
+                            <div class="card-body text-center">
+                                <i class="fas fa-long-arrow-alt-down fa-2x text-danger mb-2"></i>
+                                <h5>${{ "%.2f"|format(data.depreciation.total_depreciated) }}</h5>
+                                <small class="text-muted">Total Depreciated</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endif %}
+
+<div class="card">
+    <div class="card-header">
+        <h6 class="card-title mb-0"><i class="fas fa-info-circle text-primary me-2"></i>Financial Overview</h6>
+    </div>
+    <div class="card-body">
+        <div class="row">
+            <div class="col-md-6">
+                <h6><i class="fas fa-shopping-cart text-primary me-2"></i>Purchase Costs</h6>
+                <p class="text-muted">Total capital expenditure on asset purchases: <strong>${{ "%.2f"|format(data.total_purchase_value) }}</strong></p>
+                <p class="text-muted">Assets with recorded purchase cost: <strong>{{ data.assets_with_cost }}</strong></p>
+            </div>
+            <div class="col-md-6">
+                <h6><i class="fas fa-file-contract text-warning me-2"></i>Lease & Rental</h6>
+                <p class="text-muted">Total monthly lease/rental obligations: <strong>${{ "%.2f"|format(data.monthly_lease_cost) }}</strong></p>
+                <p class="text-muted">Annual lease expenditure: <strong>${{ "%.2f"|format(data.monthly_lease_cost * 12) }}</strong></p>
+            </div>
+        </div>
+        <hr>
+        <div class="row">
+            <div class="col-md-12">
+                <h6><i class="fas fa-calculator me-2 text-info"></i>Asset Value Summary</h6>
+                <p class="text-muted">
+                    Total asset value (purchase): <strong>${{ "%.2f"|format(data.total_purchase_value) }}</strong><br>
+                    {% if data.depreciation %}
+                    Current book value (after depreciation): <strong>${{ "%.2f"|format(data.depreciation.total_book_value) }}</strong><br>
+                    Total depreciation applied: <strong>${{ "%.2f"|format(data.depreciation.total_depreciated) }}</strong>
+                    {% endif %}
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

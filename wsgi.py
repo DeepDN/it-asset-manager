@@ -1,19 +1,11 @@
 #!/usr/bin/env python3
-"""
-WSGI entry point for production deployment.
-
-This module provides the WSGI application object for production servers
-like Gunicorn, uWSGI, or Apache mod_wsgi.
-"""
-
 import os
 import sys
-
-# Add the current directory to Python path
 sys.path.insert(0, os.path.dirname(__file__))
 
-# Import the Flask app from app.py
-from app import app
+from it_asset_manager.core.app import create_app
+
+app = create_app(os.environ.get('FLASK_ENV', 'production'))
 
 if __name__ == "__main__":
     app.run()

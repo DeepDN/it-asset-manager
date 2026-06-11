@@ -1,4 +1,23 @@
 services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: it-asset-manager-db-prod
+    environment:
+      - POSTGRES_DB=it_assets_prod
+      - POSTGRES_USER=${DB_USER:-it_assets_user}
+      - POSTGRES_PASSWORD=${DB_PASSWORD:-it_assets_pass}
+    volumes:
+      - postgres_prod_data:/var/lib/postgresql/data
+      - ./docker/postgres/init.sql:/docker-entrypoint-initdb.d/init.sql
+    networks:
+      - it-asset-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER:-it_assets_user} -d it_assets_prod"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+
   app:
     build:
       context: .
@@ -8,23 +27,24 @@ services:
     environment:
       - FLASK_ENV=production
       - SECRET_KEY=${SECRET_KEY:-your-super-secret-key-change-this}
-      - SQLALCHEMY_DATABASE_URI=sqlite:///instance/it_assets.db
+      - DATABASE_URL=postgresql://${DB_USER:-it_assets_user}:${DB_PASSWORD:-it_assets_pass}@postgres:5432/it_assets_prod
       - ADMIN_PASSWORD=${ADMIN_PASSWORD:-admin123}
+      - ASSET_BASE_URL=${ASSET_BASE_URL:-http://localhost}
     volumes:
-      - sqlite_prod_data:/app/instance
+      - uploads_prod_data:/app/uploads
       - ./logs:/app/logs
-      - ./uploads:/app/uploads
-    ports:
-      - "8000:8000"
+    depends_on:
+      postgres:
+        condition: service_healthy
     networks:
       - it-asset-network
     restart: unless-stopped
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8000/"]
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
       interval: 30s
       timeout: 10s
       retries: 3
-      start_period: 40s
+      start_period: 30s
 
   nginx:
     image: nginx:alpine
@@ -44,7 +64,8 @@ services:
     restart: unless-stopped
 
 volumes:
-  sqlite_prod_data:
+  postgres_prod_data:
+  uploads_prod_data:
 
 networks:
   it-asset-network:

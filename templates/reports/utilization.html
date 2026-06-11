@@ -1,0 +1,167 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="page-header">
+    <div class="d-flex justify-content-between align-items-center">
+        <div>
+            <h1 class="mb-2"><i class="fas fa-percentage me-3"></i>Utilization Report</h1>
+            <p class="text-muted mb-0">Asset and license utilization rates</p>
+        </div>
+        <div>
+            <a href="{{ url_for('reports.executive_dashboard') }}" class="btn btn-outline-secondary">
+                <i class="fas fa-arrow-left me-2"></i>Back to Dashboard
+            </a>
+        </div>
+    </div>
+</div>
+
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header text-center">
+                <h6 class="card-title mb-0"><i class="fas fa-chart-pie text-primary me-2"></i>Overall Asset Utilization</h6>
+            </div>
+            <div class="card-body text-center py-5">
+                <div class="position-relative d-inline-block">
+                    <canvas id="utilizationChart" width="200" height="200"></canvas>
+                    <div class="position-absolute top-50 start-50 translate-middle text-center">
+                        <h2 class="mb-0 fw-bold">{{ data.utilization_rate }}%</h2>
+                        <small class="text-muted">Utilized</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row mb-4">
+    <div class="col-md-4 mb-3">
+        <div class="stat-card stat-green">
+            <div class="stat-icon"><i class="fas fa-check-circle"></i></div>
+            <h6>In Use</h6>
+            <div class="number">{{ data.in_use }}</div>
+        </div>
+    </div>
+    <div class="col-md-4 mb-3">
+        <div class="stat-card stat-teal">
+            <div class="stat-icon"><i class="fas fa-box-open"></i></div>
+            <h6>Available</h6>
+            <div class="number">{{ data.available }}</div>
+        </div>
+    </div>
+    <div class="col-md-4 mb-3">
+        <div class="stat-card stat-blue">
+            <div class="stat-icon"><i class="fas fa-server"></i></div>
+            <h6>Total</h6>
+            <div class="number">{{ data.total_assets }}</div>
+        </div>
+    </div>
+</div>
+
+{% if data.license_utilization %}
+<div class="card">
+    <div class="card-header">
+        <h6 class="card-title mb-0"><i class="fas fa-key text-warning me-2"></i>License Utilization</h6>
+    </div>
+    <div class="card-body">
+        <div class="row align-items-center">
+            <div class="col-md-4 text-center">
+                <canvas id="licenseChart" width="160" height="160"></canvas>
+            </div>
+            <div class="col-md-8">
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <div class="card bg-light border-0">
+                            <div class="card-body text-center">
+                                <h5 class="fw-bold text-primary">{{ data.license_utilization.total_seats }}</h5>
+                                <small class="text-muted">Total Seats</small>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <div class="card bg-light border-0">
+                            <div class="card-body text-center">
+                                <h5 class="fw-bold text-success">{{ data.license_utilization.assigned_seats }}</h5>
+                                <small class="text-muted">Assigned Seats</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="mt-2">
+                    <label class="form-label fw-bold">License Utilization: {{ data.license_utilization.utilization }}%</label>
+                    <div class="progress" style="height:24px;">
+                        <div class="progress-bar {% if data.license_utilization.utilization < 50 %}bg-success{% elif data.license_utilization.utilization < 80 %}bg-warning{% else %}bg-danger{% endif %}"
+                             style="width:{{ data.license_utilization.utilization }}%;">
+                            {{ data.license_utilization.utilization }}%
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endif %}
+{% endblock %}
+
+{% block scripts %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    var ctx = document.getElementById('utilizationChart').getContext('2d');
+    new Chart(ctx, {
+        type: 'doughnut',
+        data: {
+            labels: ['In Use', 'Available'],
+            datasets: [{
+                data: [{{ data.in_use }}, {{ data.available }}],
+                backgroundColor: ['#4caf50', '#00bcd4'],
+                borderWidth: 0
+            }]
+        },
+        options: {
+            cutout: '75%',
+            plugins: {
+                legend: { display: false },
+                tooltip: {
+                    callbacks: {
+                        label: function(context) {
+                            return context.label + ': ' + context.parsed + ' assets';
+                        }
+                    }
+                }
+            },
+            responsive: false
+        }
+    });
+
+    {% if data.license_utilization %}
+    var lctx = document.getElementById('licenseChart').getContext('2d');
+    new Chart(lctx, {
+        type: 'doughnut',
+        data: {
+            labels: ['Assigned', 'Available'],
+            datasets: [{
+                data: [{{ data.license_utilization.assigned_seats }}, {{ data.license_utilization.total_seats - data.license_utilization.assigned_seats }}],
+                backgroundColor: ['#ff9800', '#e0e0e0'],
+                borderWidth: 0
+            }]
+        },
+        options: {
+            cutout: '70%',
+            plugins: {
+                legend: { display: false },
+                tooltip: {
+                    callbacks: {
+                        label: function(context) {
+                            return context.label + ': ' + context.parsed + ' seats';
+                        }
+                    }
+                }
+            },
+            responsive: false
+        }
+    });
+    {% endif %}
+});
+</script>
+{% endblock %}

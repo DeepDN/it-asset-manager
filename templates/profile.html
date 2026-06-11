@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="page-header">
+    <div class="d-flex justify-content-between align-items-center">
+        <div>
+            <h1 class="mb-2"><i class="fas fa-user me-3"></i>My Profile</h1>
+            <p class="text-muted mb-0">Your account information</p>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">
+                <h6 class="card-title mb-0"><i class="fas fa-id-card me-2"></i>Account Details</h6>
+            </div>
+            <div class="card-body">
+                <dl class="row mb-0">
+                    <dt class="col-sm-4">Username</dt>
+                    <dd class="col-sm-8">{{ user.username }}</dd>
+                    <dt class="col-sm-4">Email</dt>
+                    <dd class="col-sm-8">{{ user.email or 'Not set' }}</dd>
+                    <dt class="col-sm-4">Role</dt>
+                    <dd class="col-sm-8"><span class="badge bg-primary">{{ user.role }}</span></dd>
+                    <dt class="col-sm-4">Department</dt>
+                    <dd class="col-sm-8">{{ user.department or 'Not set' }}</dd>
+                    <dt class="col-sm-4">Active</dt>
+                    <dd class="col-sm-8">{% if user.is_active %}<span class="badge bg-success">Yes</span>{% else %}<span class="badge bg-danger">No</span>{% endif %}</dd>
+                    <dt class="col-sm-4">Last Login</dt>
+                    <dd class="col-sm-8">{{ user.last_login.strftime('%Y-%m-%d %H:%M') if user.last_login else 'Never' }}</dd>
+                    <dt class="col-sm-4">Member Since</dt>
+                    <dd class="col-sm-8">{{ user.created_at.strftime('%Y-%m-%d %H:%M') }}</dd>
+                </dl>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

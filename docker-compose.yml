@@ -1,4 +1,23 @@
 services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: it-asset-manager-db
+    environment:
+      - POSTGRES_DB=it_assets
+      - POSTGRES_USER=it_assets_user
+      - POSTGRES_PASSWORD=it_assets_pass
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./docker/postgres/init.sql:/docker-entrypoint-initdb.d/init.sql
+    networks:
+      - it-asset-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U it_assets_user -d it_assets"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+
   app:
     build:
       context: .
@@ -11,24 +30,27 @@ services:
       - FLASK_ENV=development
       - FLASK_DEBUG=1
       - SECRET_KEY=dev-secret-key-change-in-production
-      - SQLALCHEMY_DATABASE_URI=sqlite:///instance/it_assets.db
+      - DATABASE_URL=postgresql://it_assets_user:it_assets_pass@postgres:5432/it_assets
+      - ASSET_BASE_URL=http://localhost:5000
     volumes:
       - .:/app
-      - sqlite_data:/app/instance
-      - ./logs:/app/logs
-      - ./uploads:/app/uploads
+      - uploads_data:/app/uploads
+    depends_on:
+      postgres:
+        condition: service_healthy
     networks:
       - it-asset-network
     restart: unless-stopped
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:5000/"]
+      test: ["CMD", "curl", "-f", "http://localhost:5000/health"]
       interval: 30s
       timeout: 10s
       retries: 3
-      start_period: 40s
+      start_period: 30s
 
 volumes:
-  sqlite_data:
+  postgres_data:
+  uploads_data:
 
 networks:
   it-asset-network:

@@ -1,0 +1,169 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="page-header">
+    <div class="d-flex justify-content-between align-items-center">
+        <div>
+            <h1 class="mb-2"><i class="fas fa-cog me-3"></i>Setup Depreciation</h1>
+            <p class="text-muted mb-0">Configure depreciation parameters for asset</p>
+        </div>
+        <div>
+            <a href="{{ url_for('depreciation.list_depreciation') }}" class="btn btn-outline-secondary">
+                <i class="fas fa-arrow-left me-2"></i>Back to Depreciation
+            </a>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-4 mb-4">
+        <div class="card">
+            <div class="card-header">
+                <h6 class="card-title mb-0"><i class="fas fa-info-circle me-2"></i>Asset Information</h6>
+            </div>
+            <div class="card-body">
+                <div class="text-center mb-3">
+                    <i class="fas fa-laptop fa-3x text-primary mb-2"></i>
+                    <h5>{{ asset.asset_tag or 'N/A' }}</h5>
+                </div>
+                <table class="table table-sm">
+                    <tbody>
+                        <tr>
+                            <th class="text-muted">Type</th>
+                            <td>{{ asset.asset_type.title() if asset.asset_type else 'N/A' }}</td>
+                        </tr>
+                        <tr>
+                            <th class="text-muted">Brand</th>
+                            <td>{{ asset.brand or 'N/A' }}</td>
+                        </tr>
+                        <tr>
+                            <th class="text-muted">Model</th>
+                            <td>{{ asset.model or 'N/A' }}</td>
+                        </tr>
+                        <tr>
+                            <th class="text-muted">Serial</th>
+                            <td><code>{{ asset.serial_number }}</code></td>
+                        </tr>
+                        <tr>
+                            <th class="text-muted">Status</th>
+                            <td>
+                                <span class="badge bg-{% if asset.status == 'assigned' %}success{% elif asset.status == 'maintenance' %}warning{% elif asset.status == 'retired' %}secondary{% else %}info{% endif %}">
+                                    {{ asset.status.title() if asset.status else 'N/A' }}
+                                </span>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-header">
+                <h6 class="card-title mb-0"><i class="fas fa-sliders-h me-2"></i>Depreciation Settings</h6>
+            </div>
+            <div class="card-body">
+                <form method="POST">
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label for="method" class="form-label">Depreciation Method</label>
+                            <select class="form-select" id="method" name="method" required>
+                                <option value="straight_line">Straight Line</option>
+                                <option value="declining_balance">Declining Balance</option>
+                            </select>
+                            <div class="form-text">
+                                <strong>Straight Line:</strong> Equal depreciation each year.<br>
+                                <strong>Declining Balance:</strong> Accelerated depreciation.
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <label for="purchase_date" class="form-label">Purchase Date</label>
+                            <input type="date" class="form-control" id="purchase_date" name="purchase_date"
+                                   value="{{ asset.purchase_date.strftime('%Y-%m-%d') if asset.purchase_date else '' }}">
+                        </div>
+                    </div>
+
+                    <div class="row mb-3">
+                        <div class="col-md-4">
+                            <label for="purchase_cost" class="form-label">Purchase Cost ($)</label>
+                            <div class="input-group">
+                                <span class="input-group-text">$</span>
+                                <input type="number" class="form-control" id="purchase_cost" name="purchase_cost"
+                                       step="0.01" min="0" required
+                                       value="{{ asset.purchase_cost or '' }}"
+                                       placeholder="e.g. 1500.00">
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <label for="salvage_value" class="form-label">Salvage Value ($)</label>
+                            <div class="input-group">
+                                <span class="input-group-text">$</span>
+                                <input type="number" class="form-control" id="salvage_value" name="salvage_value"
+                                       step="0.01" min="0" value="0"
+                                       placeholder="e.g. 200.00">
+                            </div>
+                            <div class="form-text">Estimated value at end of life</div>
+                        </div>
+                        <div class="col-md-4">
+                            <label for="useful_life_years" class="form-label">Useful Life (Years)</label>
+                            <input type="number" class="form-control" id="useful_life_years" name="useful_life_years"
+                                   min="1" max="50" required value="3">
+                        </div>
+                    </div>
+
+                    <hr class="my-4">
+
+                    <div class="row mb-4">
+                        <div class="col-md-12">
+                            <div class="card bg-light">
+                                <div class="card-body">
+                                    <h6 class="card-title"><i class="fas fa-calculator me-2"></i>Depreciation Preview</h6>
+                                    <p class="mb-1"><strong>Annual Depreciation (Straight Line):</strong> <span id="previewAnnual">$0.00</span></p>
+                                    <p class="mb-0"><strong>Monthly Depreciation:</strong> <span id="previewMonthly">$0.00</span></p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                        <a href="{{ url_for('depreciation.list_depreciation') }}" class="btn btn-secondary me-md-2">
+                            <i class="fas fa-times me-1"></i>Cancel
+                        </a>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-save me-1"></i>Save Depreciation
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const costInput = document.getElementById('purchase_cost');
+    const salvageInput = document.getElementById('salvage_value');
+    const lifeInput = document.getElementById('useful_life_years');
+    const previewAnnual = document.getElementById('previewAnnual');
+    const previewMonthly = document.getElementById('previewMonthly');
+
+    function updatePreview() {
+        const cost = parseFloat(costInput.value) || 0;
+        const salvage = parseFloat(salvageInput.value) || 0;
+        const life = parseInt(lifeInput.value) || 1;
+        const annual = (cost - salvage) / life;
+        const monthly = annual / 12;
+        previewAnnual.textContent = '$' + annual.toFixed(2);
+        previewMonthly.textContent = '$' + monthly.toFixed(2);
+    }
+
+    costInput.addEventListener('input', updatePreview);
+    salvageInput.addEventListener('input', updatePreview);
+    lifeInput.addEventListener('input', updatePreview);
+    updatePreview();
+});
+</script>
+{% endblock %}

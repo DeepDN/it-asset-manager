@@ -1,0 +1,164 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="page-header">
+    <div class="d-flex justify-content-between align-items-center">
+        <div>
+            <h1 class="mb-2"><i class="fas fa-users me-3"></i>Users & Roles</h1>
+            <p class="text-muted mb-0">Manage user accounts and permissions</p>
+        </div>
+        <a href="{{ url_for('admin.add_user') }}" class="btn btn-primary">
+            <i class="fas fa-user-plus me-1"></i> Add User
+        </a>
+    </div>
+</div>
+
+<div class="row mb-4">
+    <div class="col-md-3 mb-3">
+        <div class="stat-card stat-blue">
+            <div class="stat-icon"><i class="fas fa-users"></i></div>
+            <h6>Total Users</h6>
+            <div class="number">{{ users|length }}</div>
+        </div>
+    </div>
+    <div class="col-md-3 mb-3">
+        <div class="stat-card stat-green">
+            <div class="stat-icon"><i class="fas fa-user-check"></i></div>
+            <h6>Active</h6>
+            <div class="number">{{ users|selectattr("is_active", "equalto", true)|list|length }}</div>
+        </div>
+    </div>
+    <div class="col-md-3 mb-3">
+        <div class="stat-card stat-red">
+            <div class="stat-icon"><i class="fas fa-user-slash"></i></div>
+            <h6>Inactive</h6>
+            <div class="number">{{ users|selectattr("is_active", "equalto", false)|list|length }}</div>
+        </div>
+    </div>
+    <div class="col-md-3 mb-3">
+        <div class="stat-card stat-purple">
+            <div class="stat-icon"><i class="fas fa-user-tag"></i></div>
+            <h6>Roles</h6>
+            <div class="number">{{ roles|length }}</div>
+        </div>
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-header">
+        <h6 class="card-title mb-0">
+            <i class="fas fa-list text-primary me-2"></i>User Accounts
+        </h6>
+    </div>
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-hover mb-0">
+                <thead>
+                    <tr>
+                        <th>Username</th>
+                        <th>Email</th>
+                        <th>Role</th>
+                        <th>Department</th>
+                        <th>Last Login</th>
+                        <th>Active</th>
+                        <th>Actions</th>
+                        <th style="width:40px;"></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for user in users %}
+                    <tr>
+                        <td>
+                            <div class="d-flex align-items-center">
+                                <div class="icon-shape bg-light rounded-circle me-2 d-flex align-items-center justify-content-center" style="width:36px;height:36px;">
+                                    <i class="fas fa-user text-primary"></i>
+                                </div>
+                                <strong>{{ user.username }}</strong>
+                            </div>
+                        </td>
+                        <td>{{ user.email or 'N/A' }}</td>
+                        <td>
+                            <form method="POST" action="{{ url_for('admin.update_user_role', user_id=user.id) }}" class="d-flex align-items-center gap-2" style="display:inline-flex;">
+                                <select name="role" class="form-select form-select-sm" style="width:auto;">
+                                    {% for role in roles %}
+                                    <option value="{{ role }}" {% if user.role == role %}selected{% endif %}>{{ role|replace('_', ' ')|title }}</option>
+                                    {% endfor %}
+                                </select>
+                                <button type="submit" class="btn btn-sm btn-outline-primary" title="Update Role">
+                                    <i class="fas fa-save"></i>
+                                </button>
+                            </form>
+                        </td>
+                        <td>{{ user.department or 'N/A' }}</td>
+                        <td>
+                            {% if user.last_login %}
+                                <small>{{ user.last_login.strftime('%Y-%m-%d %H:%M') }}</small>
+                            {% else %}
+                                <span class="text-muted">Never</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if user.is_active %}
+                                <span class="badge bg-success"><i class="fas fa-check me-1"></i>Active</span>
+                            {% else %}
+                                <span class="badge bg-secondary"><i class="fas fa-times me-1"></i>Inactive</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <form method="POST" action="{{ url_for('admin.toggle_user', user_id=user.id) }}" style="display:inline;">
+                                {% if user.is_active %}
+                                <button type="submit" class="btn btn-sm btn-outline-danger" title="Deactivate User" onclick="return confirm('Deactivate {{ user.username }}?')">
+                                    <i class="fas fa-ban"></i>
+                                </button>
+                                {% else %}
+                                <button type="submit" class="btn btn-sm btn-outline-success" title="Activate User" onclick="return confirm('Activate {{ user.username }}?')">
+                                    <i class="fas fa-check-circle"></i>
+                                </button>
+                                {% endif %}
+                            </form>
+                        </td>
+                        <td>
+                            {% if user.username != 'admin' %}
+                            <button type="button" class="btn btn-sm btn-outline-warning" title="Reset Password"
+                                    onclick="document.getElementById('resetModal{{ user.id }}').style.display='block'">
+                                <i class="fas fa-key"></i>
+                            </button>
+                            <div id="resetModal{{ user.id }}" class="modal fade show" style="display:none;background:rgba(0,0,0,0.5);" onclick="if(event.target===this)this.style.display='none'">
+                                <div class="modal-dialog modal-dialog-centered" onclick="event.stopPropagation()">
+                                    <div class="modal-content">
+                                        <div class="modal-header">
+                                            <h6 class="modal-title">Reset Password: {{ user.username }}</h6>
+                                            <button type="button" class="btn-close" onclick="this.closest('.modal').style.display='none'"></button>
+                                        </div>
+                                        <form method="POST" action="{{ url_for('admin.reset_user_password', user_id=user.id) }}">
+                                            <div class="modal-body">
+                                                <label class="form-label">New Password <span class="text-danger">*</span></label>
+                                                <input type="password" name="new_password" class="form-control" required minlength="6" placeholder="Min 6 characters">
+                                            </div>
+                                            <div class="modal-footer">
+                                                <button type="button" class="btn btn-secondary btn-sm" onclick="this.closest('.modal').style.display='none'">Cancel</button>
+                                                <button type="submit" class="btn btn-warning btn-sm"><i class="fas fa-save me-1"></i> Reset</button>
+                                            </div>
+                                        </form>
+                                    </div>
+                                </div>
+                            </div>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td colspan="8" class="text-center py-5">
+                            <div class="text-muted">
+                                <i class="fas fa-users fa-3x mb-3"></i>
+                                <h5>No users found</h5>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

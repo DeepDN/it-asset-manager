@@ -4,7 +4,7 @@
 <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
     <h1 class="h2"><i class="fas fa-plus"></i> Add Application Access</h1>
     <div class="btn-toolbar mb-2 mb-md-0">
-        <a href="{{ url_for('app_access') }}" class="btn btn-outline-secondary">
+        <a href="{{ url_for('access.list_application_access') }}" class="btn btn-outline-secondary">
             <i class="fas fa-arrow-left"></i> Back to App Access
         </a>
     </div>
@@ -59,7 +59,7 @@
                     </div>
 
                     <div class="d-grid gap-2 d-md-flex justify-content-md-end">
-                        <a href="{{ url_for('app_access') }}" class="btn btn-secondary me-md-2">Cancel</a>
+                        <a href="{{ url_for('access.list_application_access') }}" class="btn btn-secondary me-md-2">Cancel</a>
                         <button type="submit" class="btn btn-primary">
                             <i class="fas fa-save"></i> Save Access
                         </button>
@@ -77,13 +77,29 @@
             <div class="card-body">
                 <ul class="list-unstyled">
                     <li><i class="fab fa-github"></i> GitHub</li>
+                    <li><i class="fab fa-gitlab"></i> GitLab</li>
+                    <li><i class="fab fa-bitbucket"></i> Bitbucket</li>
                     <li><i class="fab fa-google"></i> Google Workspace</li>
-                    <li><i class="fab fa-slack"></i> Slack</li>
                     <li><i class="fab fa-microsoft"></i> Microsoft 365</li>
+                    <li><i class="fab fa-slack"></i> Slack</li>
                     <li><i class="fab fa-aws"></i> AWS Console</li>
+                    <li><i class="fas fa-cloud"></i> Azure Portal</li>
                     <li><i class="fas fa-database"></i> Database Systems</li>
                     <li><i class="fas fa-server"></i> Server Access</li>
                     <li><i class="fas fa-shield-alt"></i> VPN Access</li>
+                    <li><i class="fas fa-tasks"></i> Jira / Confluence</li>
+                    <li><i class="fab fa-docker"></i> Docker / Kubernetes</li>
+                    <li><i class="fas fa-code"></i> Jenkins / CI/CD</li>
+                    <li><i class="fas fa-chart-line"></i> Datadog / Monitoring</li>
+                    <li><i class="fas fa-bell"></i> PagerDuty</li>
+                    <li><i class="fas fa-key"></i> Okta / SSO</li>
+                    <li><i class="fas fa-chart-bar"></i> Salesforce</li>
+                    <li><i class="fas fa-life-ring"></i> ServiceNow</li>
+                    <li><i class="fas fa-headset"></i> Zendesk</li>
+                    <li><i class="fas fa-paint-brush"></i> Figma</li>
+                    <li><i class="fas fa-file-alt"></i> Notion</li>
+                    <li><i class="fas fa-video"></i> Zoom / Teams</li>
+                    <li><i class="fas fa-cogs"></i> HubSpot</li>
                 </ul>
             </div>
         </div>

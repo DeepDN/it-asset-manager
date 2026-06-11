@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Asset {{ asset.asset_tag }} — AssetPulse</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body class="bg-light">
+    <div class="container mt-5">
+        <div class="row justify-content-center">
+            <div class="col-md-6">
+                <div class="card shadow">
+                    <div class="card-header bg-primary text-white text-center">
+                        <h4 class="mb-0"><i class="fas fa-qrcode me-2"></i>Asset Lookup</h4>
+                    </div>
+                    <div class="card-body text-center">
+                        <div class="display-6 mb-3">{{ asset.asset_tag }}</div>
+                        <table class="table table-bordered text-start">
+                            <tr><th>Type</th><td>{{ asset.asset_type }}</td></tr>
+                            <tr><th>Brand / Model</th><td>{{ asset.brand or '-' }} / {{ asset.model or '-' }}</td></tr>
+                            <tr><th>Serial Number</th><td>{{ asset.serial_number }}</td></tr>
+                            <tr><th>Status</th><td><span class="badge bg-{{ 'success' if asset.lifecycle_stage == 'assigned' else 'warning' }}">{{ asset.lifecycle_stage }}</span></td></tr>
+                            {% if asset.assigned_to %}<tr><th>Assigned To</th><td>{{ asset.assigned_to }}</td></tr>{% endif %}
+                            {% if asset.location %}<tr><th>Location</th><td>{{ asset.location }}</td></tr>{% endif %}
+                            {% if asset.purchase_date %}<tr><th>Purchase Date</th><td>{{ asset.purchase_date }}</td></tr>{% endif %}
+                            {% if asset.warranty_expiry %}<tr><th>Warranty Until</th><td>{{ asset.warranty_expiry }}</td></tr>{% endif %}
+                        </table>
+                    </div>
+                    <div class="card-footer text-center text-muted small">
+                        <i class="fas fa-shield-alt me-1"></i>AssetPulse IT Asset Manager
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

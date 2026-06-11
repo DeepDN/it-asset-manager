@@ -8,7 +8,7 @@
             <p class="text-muted mb-0">Upload multiple application access records using a CSV file</p>
         </div>
         <div>
-            <a href="{{ url_for('app_access') }}" class="btn btn-secondary">
+            <a href="{{ url_for('access.list_application_access') }}" class="btn btn-secondary">
                 <i class="fas fa-arrow-left me-2"></i>Back to App Access
             </a>
         </div>
@@ -53,7 +53,7 @@
             </div>
             <div class="card-body">
                 <p class="text-muted">Download the CSV template to see the required format and sample data.</p>
-                <a href="{{ url_for('download_app_access_template') }}" class="btn btn-info">
+                <a href="{{ url_for('access.download_sample_app_access_csv') }}" class="btn btn-info">
                     <i class="fas fa-download me-2"></i>Download Template
                 </a>
             </div>

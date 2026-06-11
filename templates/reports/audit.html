@@ -1,0 +1,197 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="page-header">
+    <div class="d-flex justify-content-between align-items-center">
+        <div>
+            <h1 class="mb-2"><i class="fas fa-clipboard-check me-3"></i>Audit Report</h1>
+            <p class="text-muted mb-0">Comprehensive audit overview of assets, access, and compliance</p>
+        </div>
+        <div>
+            <a href="{{ url_for('reports.executive_dashboard') }}" class="btn btn-outline-secondary">
+                <i class="fas fa-arrow-left me-2"></i>Back to Dashboard
+            </a>
+        </div>
+    </div>
+</div>
+
+<div class="row mb-4">
+    <div class="col-md-3 mb-3">
+        <div class="stat-card stat-blue">
+            <div class="stat-icon"><i class="fas fa-server"></i></div>
+            <h6>Total Assets</h6>
+            <div class="number">{{ data.total_assets }}</div>
+        </div>
+    </div>
+    <div class="col-md-3 mb-3">
+        <div class="stat-card stat-green">
+            <div class="stat-icon"><i class="fas fa-user-check"></i></div>
+            <h6>Assigned</h6>
+            <div class="number">{{ data.assigned }}</div>
+        </div>
+    </div>
+    <div class="col-md-3 mb-3">
+        <div class="stat-card stat-teal">
+            <div class="stat-icon"><i class="fas fa-box"></i></div>
+            <h6>Unassigned</h6>
+            <div class="number">{{ data.unassigned }}</div>
+        </div>
+    </div>
+    <div class="col-md-3 mb-3">
+        <div class="stat-card stat-orange">
+            <div class="stat-icon"><i class="fas fa-wrench"></i></div>
+            <h6>Maintenance</h6>
+            <div class="number">{{ data.maintenance }}</div>
+        </div>
+    </div>
+</div>
+
+<div class="row mb-4">
+    <div class="col-md-3 mb-3">
+        <div class="stat-card stat-red">
+            <div class="stat-icon"><i class="fas fa-archive"></i></div>
+            <h6>Retired</h6>
+            <div class="number">{{ data.retired }}</div>
+        </div>
+    </div>
+    <div class="col-md-3 mb-3">
+        <div class="stat-card stat-purple">
+            <div class="stat-icon"><i class="fas fa-users-cog"></i></div>
+            <h6>Active App Access</h6>
+            <div class="number">{{ data.active_app_access }}</div>
+        </div>
+    </div>
+    <div class="col-md-3 mb-3">
+        <div class="stat-card stat-blue">
+            <div class="stat-icon"><i class="fab fa-github"></i></div>
+            <h6>Active GitHub Access</h6>
+            <div class="number">{{ data.active_github_access }}</div>
+        </div>
+    </div>
+    <div class="col-md-3 mb-3">
+        <div class="stat-card stat-purple">
+            <div class="stat-icon"><i class="fas fa-key"></i></div>
+            <h6>Total Licenses</h6>
+            <div class="number">{{ data.total_licenses }}</div>
+        </div>
+    </div>
+</div>
+
+<div class="row mb-4">
+    <div class="col-md-3 mb-3">
+        <div class="stat-card stat-green">
+            <div class="stat-icon"><i class="fas fa-handshake"></i></div>
+            <h6>Active Checkouts</h6>
+            <div class="number">{{ data.active_checkouts }}</div>
+        </div>
+    </div>
+    <div class="col-md-3 mb-3">
+        <div class="stat-card stat-red">
+            <div class="stat-icon"><i class="fas fa-exclamation-triangle"></i></div>
+            <h6>Overdue Checkouts</h6>
+            <div class="number">{{ data.overdue_checkouts }}</div>
+        </div>
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-header">
+        <h6 class="card-title mb-0"><i class="fas fa-table text-primary me-2"></i>Audit Summary</h6>
+    </div>
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-hover mb-0">
+                <thead>
+                    <tr>
+                        <th>Metric</th>
+                        <th class="text-end">Count</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><i class="fas fa-server text-primary me-2"></i>Total Assets</td>
+                        <td class="text-end">{{ data.total_assets }}</td>
+                        <td><span class="badge bg-info">Base Count</span></td>
+                    </tr>
+                    <tr>
+                        <td><i class="fas fa-user-check text-success me-2"></i>Assigned Assets</td>
+                        <td class="text-end">{{ data.assigned }}</td>
+                        <td>
+                            {% if data.total_assets > 0 and data.assigned / data.total_assets * 100 > 75 %}
+                                <span class="badge bg-success">Healthy</span>
+                            {% else %}
+                                <span class="badge bg-warning">Low Assignment</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    <tr>
+                        <td><i class="fas fa-box text-teal me-2"></i>Unassigned Assets</td>
+                        <td class="text-end">{{ data.unassigned }}</td>
+                        <td>
+                            {% if data.unassigned > 10 %}
+                                <span class="badge bg-warning">Review Needed</span>
+                            {% else %}
+                                <span class="badge bg-success">Good</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    <tr>
+                        <td><i class="fas fa-wrench text-orange me-2"></i>Under Maintenance</td>
+                        <td class="text-end">{{ data.maintenance }}</td>
+                        <td>
+                            {% if data.maintenance > 5 %}
+                                <span class="badge bg-warning">Attention</span>
+                            {% else %}
+                                <span class="badge bg-success">Normal</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    <tr>
+                        <td><i class="fas fa-archive text-red me-2"></i>Retired Assets</td>
+                        <td class="text-end">{{ data.retired }}</td>
+                        <td><span class="badge bg-secondary">Historical</span></td>
+                    </tr>
+                    <tr>
+                        <td><i class="fas fa-users-cog text-purple me-2"></i>Active App Access</td>
+                        <td class="text-end">{{ data.active_app_access }}</td>
+                        <td><span class="badge bg-success">Active</span></td>
+                    </tr>
+                    <tr>
+                        <td><i class="fab fa-github text-dark me-2"></i>Active GitHub Access</td>
+                        <td class="text-end">{{ data.active_github_access }}</td>
+                        <td><span class="badge bg-success">Active</span></td>
+                    </tr>
+                    <tr>
+                        <td><i class="fas fa-key text-purple me-2"></i>Total Software Licenses</td>
+                        <td class="text-end">{{ data.total_licenses }}</td>
+                        <td><span class="badge bg-info">Inventory</span></td>
+                    </tr>
+                    <tr>
+                        <td><i class="fas fa-handshake text-success me-2"></i>Active Checkouts</td>
+                        <td class="text-end">{{ data.active_checkouts }}</td>
+                        <td>
+                            {% if data.overdue_checkouts > 0 %}
+                                <span class="badge bg-warning">Has Overdue</span>
+                            {% else %}
+                                <span class="badge bg-success">On Track</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    <tr>
+                        <td><i class="fas fa-exclamation-triangle text-danger me-2"></i>Overdue Checkouts</td>
+                        <td class="text-end">{{ data.overdue_checkouts }}</td>
+                        <td>
+                            {% if data.overdue_checkouts > 0 %}
+                                <span class="badge bg-danger">Action Required</span>
+                            {% else %}
+                                <span class="badge bg-success">None</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

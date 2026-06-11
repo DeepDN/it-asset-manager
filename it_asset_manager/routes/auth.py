@@ -33,7 +33,11 @@ def login():
             flash('Please enter both username and password', 'error')
             return render_template('login.html')
         
-        success, message, user = AuthService.authenticate_user(username, password, remember_me)
+        try:
+            success, message, user = AuthService.authenticate_user(username, password, remember_me)
+        except Exception as e:
+            flash(f'Login error: {str(e)}', 'error')
+            return render_template('login.html')
         
         if success:
             flash(message, 'success')
@@ -53,8 +57,11 @@ def logout():
     
     Logs out current user and redirects to login page.
     """
-    success, message = AuthService.logout_user_session()
-    flash(message, 'success' if success else 'error')
+    try:
+        success, message = AuthService.logout_user_session()
+        flash(message, 'success' if success else 'error')
+    except Exception as e:
+        flash(f'Logout error: {str(e)}', 'error')
     return redirect(url_for('auth.login'))
 
 
@@ -81,10 +88,13 @@ def change_password():
             flash('New passwords do not match', 'error')
             return render_template('change_password.html')
         
-        # Change password
-        success, message = AuthService.change_password(
-            current_user.id, current_password, new_password
-        )
+        try:
+            success, message = AuthService.change_password(
+                current_user.id, current_password, new_password
+            )
+        except Exception as e:
+            flash(f'Error changing password: {str(e)}', 'error')
+            return render_template('change_password.html')
         
         flash(message, 'success' if success else 'error')
         
@@ -112,7 +122,11 @@ def forgot_password():
             flash('Please enter your username or email', 'error')
             return render_template('forgot_password.html')
         
-        success, message, reset_token = AuthService.initiate_password_reset(username_or_email)
+        try:
+            success, message, reset_token = AuthService.initiate_password_reset(username_or_email)
+        except Exception as e:
+            flash(f'Error initiating reset: {str(e)}', 'error')
+            return render_template('forgot_password.html')
         
         if success:
             # In a real application, you would send this token via email
@@ -152,8 +166,11 @@ def reset_password(token: str):
             flash('Passwords do not match', 'error')
             return render_template('reset_password.html', token=token)
         
-        # Reset password
-        success, message = AuthService.reset_password_with_token(token, new_password)
+        try:
+            success, message = AuthService.reset_password_with_token(token, new_password)
+        except Exception as e:
+            flash(f'Error resetting password: {str(e)}', 'error')
+            return render_template('reset_password.html', token=token)
         
         flash(message, 'success' if success else 'error')
         
@@ -175,7 +192,11 @@ def profile():
     if request.method == 'POST':
         email = request.form.get('email', '').strip()
         
-        success, message = AuthService.update_user_profile(current_user.id, email)
+        try:
+            success, message = AuthService.update_user_profile(current_user.id, email)
+        except Exception as e:
+            flash(f'Error updating profile: {str(e)}', 'error')
+            return render_template('profile.html', user=current_user)
         flash(message, 'success' if success else 'error')
         
         if success:

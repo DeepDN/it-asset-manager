@@ -1,0 +1,203 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="page-header">
+    <div class="d-flex justify-content-between align-items-center">
+        <div>
+            <h1 class="mb-2"><i class="fas fa-chart-pie me-3"></i>Executive Dashboard</h1>
+            <p class="text-muted mb-0">High-level overview of your IT asset landscape</p>
+        </div>
+        <div class="btn-group">
+            <a href="{{ url_for('reports.warranty_report') }}" class="btn btn-outline-primary">
+                <i class="fas fa-shield-alt me-2"></i>Warranty
+            </a>
+            <a href="{{ url_for('reports.financial_report') }}" class="btn btn-outline-primary">
+                <i class="fas fa-dollar-sign me-2"></i>Financial
+            </a>
+            <a href="{{ url_for('reports.audit_report') }}" class="btn btn-outline-primary">
+                <i class="fas fa-clipboard-check me-2"></i>Audit
+            </a>
+            <a href="{{ url_for('reports.utilization_report') }}" class="btn btn-outline-primary">
+                <i class="fas fa-percentage me-2"></i>Utilization
+            </a>
+        </div>
+    </div>
+</div>
+
+<div class="row mb-4">
+    <div class="col-xl-2 col-md-4 mb-3">
+        <div class="stat-card stat-blue">
+            <div class="stat-icon"><i class="fas fa-server"></i></div>
+            <h6>Total Assets</h6>
+            <div class="number">{{ data.total_assets }}</div>
+        </div>
+    </div>
+    <div class="col-xl-2 col-md-4 mb-3">
+        <div class="stat-card stat-green">
+            <div class="stat-icon"><i class="fas fa-check-circle"></i></div>
+            <h6>Active</h6>
+            <div class="number">{{ data.active_assets }}</div>
+        </div>
+    </div>
+    <div class="col-xl-2 col-md-4 mb-3">
+        <div class="stat-card stat-teal">
+            <div class="stat-icon"><i class="fas fa-user-check"></i></div>
+            <h6>Assigned</h6>
+            <div class="number">{{ data.assigned_assets }}</div>
+        </div>
+    </div>
+    <div class="col-xl-2 col-md-4 mb-3">
+        <div class="stat-card stat-orange">
+            <div class="stat-icon"><i class="fas fa-wrench"></i></div>
+            <h6>In Repair</h6>
+            <div class="number">{{ data.in_repair }}</div>
+        </div>
+    </div>
+    <div class="col-xl-2 col-md-4 mb-3">
+        <div class="stat-card stat-red">
+            <div class="stat-icon"><i class="fas fa-shield-alt"></i></div>
+            <h6>Warranty Expiring</h6>
+            <div class="number">{{ data.warranty_expiring }}</div>
+        </div>
+    </div>
+    <div class="col-xl-2 col-md-4 mb-3">
+        <div class="stat-card stat-purple">
+            <div class="stat-icon"><i class="fas fa-key"></i></div>
+            <h6>Licenses Expiring</h6>
+            <div class="number">{{ data.licenses_expiring }}</div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-lg-4 mb-4">
+        <div class="card h-100">
+            <div class="card-header">
+                <h6 class="card-title mb-0"><i class="fas fa-tag text-primary me-2"></i>Assets by Category</h6>
+            </div>
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-hover mb-0">
+                        <thead>
+                            <tr>
+                                <th>Category</th>
+                                <th class="text-end">Count</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for category, count in data.assets_by_category.items() %}
+                            <tr>
+                                <td>{{ category if category else 'Uncategorized' }}</td>
+                                <td class="text-end"><span class="badge bg-primary rounded-pill">{{ count }}</span></td>
+                            </tr>
+                            {% else %}
+                            <tr>
+                                <td colspan="2" class="text-center py-4 text-muted">No data</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-lg-4 mb-4">
+        <div class="card h-100">
+            <div class="card-header">
+                <h6 class="card-title mb-0"><i class="fas fa-laptop text-success me-2"></i>Assets by Type</h6>
+            </div>
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-hover mb-0">
+                        <thead>
+                            <tr>
+                                <th>Type</th>
+                                <th class="text-end">Count</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for type, count in data.assets_by_type.items() %}
+                            <tr>
+                                <td><i class="fas fa-{% if type == 'laptop' %}laptop{% elif type == 'desktop' %}desktop{% elif type in ['mobile', 'iphone'] %}mobile-alt{% elif type in ['tablet', 'ipad'] %}tablet-alt{% elif type in ['router', 'switch'] %}network-wired{% elif type == 'monitor' %}desktop{% elif type == 'printer' %}print{% else %}cube{% endif %} me-2"></i>{{ type.title() if type else 'Other' }}</td>
+                                <td class="text-end"><span class="badge bg-success rounded-pill">{{ count }}</span></td>
+                            </tr>
+                            {% else %}
+                            <tr>
+                                <td colspan="2" class="text-center py-4 text-muted">No data</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-lg-4 mb-4">
+        <div class="card h-100">
+            <div class="card-header">
+                <h6 class="card-title mb-0"><i class="fas fa-map-marker-alt text-warning me-2"></i>Assets by Location</h6>
+            </div>
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-hover mb-0">
+                        <thead>
+                            <tr>
+                                <th>Location</th>
+                                <th class="text-end">Count</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for location, count in data.assets_by_location.items() %}
+                            <tr>
+                                <td><i class="fas fa-map-pin me-2"></i>{{ location or 'Unknown' }}</td>
+                                <td class="text-end"><span class="badge bg-warning rounded-pill">{{ count }}</span></td>
+                            </tr>
+                            {% else %}
+                            <tr>
+                                <td colspan="2" class="text-center py-4 text-muted">No data</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h6 class="card-title mb-0"><i class="fas fa-link text-info me-2"></i>Quick Links</h6>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-3 mb-2">
+                        <a href="{{ url_for('reports.warranty_report') }}" class="btn btn-outline-primary w-100">
+                            <i class="fas fa-shield-alt me-2"></i>Warranty Report
+                        </a>
+                    </div>
+                    <div class="col-md-3 mb-2">
+                        <a href="{{ url_for('reports.financial_report') }}" class="btn btn-outline-success w-100">
+                            <i class="fas fa-dollar-sign me-2"></i>Financial Report
+                        </a>
+                    </div>
+                    <div class="col-md-3 mb-2">
+                        <a href="{{ url_for('reports.audit_report') }}" class="btn btn-outline-warning w-100">
+                            <i class="fas fa-clipboard-check me-2"></i>Audit Report
+                        </a>
+                    </div>
+                    <div class="col-md-3 mb-2">
+                        <a href="{{ url_for('reports.utilization_report') }}" class="btn btn-outline-info w-100">
+                            <i class="fas fa-percentage me-2"></i>Utilization Report
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

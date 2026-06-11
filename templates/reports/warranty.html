@@ -1,0 +1,117 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="page-header">
+    <div class="d-flex justify-content-between align-items-center">
+        <div>
+            <h1 class="mb-2"><i class="fas fa-shield-alt me-3"></i>Warranty Report</h1>
+            <p class="text-muted mb-0">Track warranty status and upcoming expirations</p>
+        </div>
+        <div>
+            <a href="{{ url_for('reports.executive_dashboard') }}" class="btn btn-outline-secondary">
+                <i class="fas fa-arrow-left me-2"></i>Back to Dashboard
+            </a>
+        </div>
+    </div>
+</div>
+
+<div class="row mb-4">
+    <div class="col-md-4 mb-3">
+        <div class="stat-card stat-green">
+            <div class="stat-icon"><i class="fas fa-check-circle"></i></div>
+            <h6>Active Warranties</h6>
+            <div class="number">{{ items|selectattr("status", "equalto", "active")|list|length }}</div>
+        </div>
+    </div>
+    <div class="col-md-4 mb-3">
+        <div class="stat-card stat-red">
+            <div class="stat-icon"><i class="fas fa-exclamation-triangle"></i></div>
+            <h6>Expired Warranties</h6>
+            <div class="number">{{ items|selectattr("status", "equalto", "expired")|list|length }}</div>
+        </div>
+    </div>
+    <div class="col-md-4 mb-3">
+        <div class="stat-card stat-blue">
+            <div class="stat-icon"><i class="fas fa-shield-alt"></i></div>
+            <h6>Total Warranty Records</h6>
+            <div class="number">{{ items|length }}</div>
+        </div>
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-header">
+        <h6 class="card-title mb-0">
+            <i class="fas fa-list text-primary me-2"></i>Warranty Items
+        </h6>
+    </div>
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-hover mb-0">
+                <thead>
+                    <tr>
+                        <th>Asset Tag</th>
+                        <th>Brand</th>
+                        <th>Model</th>
+                        <th>Serial Number</th>
+                        <th>Expiry Date</th>
+                        <th>Days Remaining</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for item in items %}
+                    <tr>
+                        <td>
+                            <span class="badge bg-primary">{{ item.asset_tag or 'N/A' }}</span>
+                        </td>
+                        <td>{{ item.brand or 'N/A' }}</td>
+                        <td>{{ item.model or 'N/A' }}</td>
+                        <td><code>{{ item.serial_number or 'N/A' }}</code></td>
+                        <td>
+                            {% if item.warranty_expiry %}
+                                {{ item.warranty_expiry }}
+                            {% else %}
+                                <span class="text-muted">N/A</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if item.days_remaining is not none %}
+                                {% if item.days_remaining > 90 %}
+                                    <span class="badge bg-success">{{ item.days_remaining }} days</span>
+                                {% elif item.days_remaining > 30 %}
+                                    <span class="badge bg-warning">{{ item.days_remaining }} days</span>
+                                {% elif item.days_remaining >= 0 %}
+                                    <span class="badge bg-danger">{{ item.days_remaining }} days</span>
+                                {% else %}
+                                    <span class="badge bg-secondary">{{ item.days_remaining }} days</span>
+                                {% endif %}
+                            {% else %}
+                                <span class="text-muted">N/A</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if item.status == 'active' %}
+                                <span class="badge bg-success"><i class="fas fa-check me-1"></i>Active</span>
+                            {% else %}
+                                <span class="badge bg-secondary"><i class="fas fa-times me-1"></i>Expired</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td colspan="7" class="text-center py-5">
+                            <div class="text-muted">
+                                <i class="fas fa-shield-alt fa-3x mb-3"></i>
+                                <h5>No warranty records found</h5>
+                                <p>Assets with warranty information will appear here.</p>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

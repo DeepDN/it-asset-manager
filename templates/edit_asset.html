@@ -4,7 +4,7 @@
 <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
     <h1 class="h2"><i class="fas fa-edit"></i> Edit Asset</h1>
     <div class="btn-toolbar mb-2 mb-md-0">
-        <a href="{{ url_for('assets') }}" class="btn btn-outline-secondary">
+        <a href="{{ url_for('assets.list_assets') }}" class="btn btn-outline-secondary">
             <i class="fas fa-arrow-left"></i> Back to Assets
         </a>
     </div>
@@ -73,7 +73,14 @@
                         </div>
                         <div class="col-md-6 mb-3">
                             <label for="assigned_to" class="form-label">Assigned To</label>
-                            <input type="text" class="form-control" id="assigned_to" name="assigned_to" value="{{ asset.assigned_to or '' }}" placeholder="Employee name or ID">
+                            <select class="form-select" id="assigned_to" name="assigned_to">
+                                <option value="">-- Unassigned --</option>
+                                {% for u in users %}
+                                <option value="{{ u.username }}" {% if asset.assigned_to == u.username %}selected{% endif %}>
+                                    {{ u.username }}{% if u.department %} ({{ u.department }}){% endif %}
+                                </option>
+                                {% endfor %}
+                            </select>
                         </div>
                     </div>
 
@@ -94,7 +101,7 @@
                     </div>
 
                     <div class="d-grid gap-2 d-md-flex justify-content-md-end">
-                        <a href="{{ url_for('assets') }}" class="btn btn-secondary me-md-2">Cancel</a>
+                        <a href="{{ url_for('assets.list_assets') }}" class="btn btn-secondary me-md-2">Cancel</a>
                         <button type="submit" class="btn btn-primary">
                             <i class="fas fa-save"></i> Update Asset
                         </button>
@@ -121,6 +128,15 @@
                         <i class="fas fa-exclamation-triangle"></i> This asset was returned on {{ asset.remove_date.strftime('%Y-%m-%d') }}
                     </div>
                 {% endif %}
+                <hr>
+                <div class="d-grid gap-2">
+                    <a href="{{ url_for('assets.qr_code_image', asset_tag=asset.asset_tag) }}" class="btn btn-outline-dark btn-sm" target="_blank">
+                        <i class="fas fa-qrcode"></i> View QR Code
+                    </a>
+                    <a href="{{ url_for('assets.barcode_image', asset_tag=asset.asset_tag) }}" class="btn btn-outline-secondary btn-sm" target="_blank">
+                        <i class="fas fa-barcode"></i> View Barcode
+                    </a>
+                </div>
             </div>
         </div>
     </div>

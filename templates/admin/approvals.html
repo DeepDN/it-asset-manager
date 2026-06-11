@@ -1,0 +1,269 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="page-header">
+    <div class="d-flex justify-content-between align-items-center">
+        <div>
+            <h1 class="mb-2"><i class="fas fa-check-double me-3"></i>Approvals</h1>
+            <p class="text-muted mb-0">Review and manage approval requests</p>
+        </div>
+        <div>
+            <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#newApprovalModal">
+                <i class="fas fa-plus me-2"></i>New Request
+            </button>
+        </div>
+    </div>
+</div>
+
+<div class="row mb-4">
+    <div class="col-md-3 mb-3">
+        <div class="stat-card stat-blue">
+            <div class="stat-icon"><i class="fas fa-clock"></i></div>
+            <h6>Total Requests</h6>
+            <div class="number">{{ requests|length }}</div>
+        </div>
+    </div>
+    <div class="col-md-3 mb-3">
+        <div class="stat-card stat-warning">
+            <div class="stat-icon"><i class="fas fa-hourglass-half"></i></div>
+            <h6>Pending</h6>
+            <div class="number">{{ requests|selectattr("status", "equalto", "pending")|list|length }}</div>
+        </div>
+    </div>
+    <div class="col-md-3 mb-3">
+        <div class="stat-card stat-green">
+            <div class="stat-icon"><i class="fas fa-thumbs-up"></i></div>
+            <h6>Approved</h6>
+            <div class="number">{{ requests|selectattr("status", "equalto", "approved")|list|length }}</div>
+        </div>
+    </div>
+    <div class="col-md-3 mb-3">
+        <div class="stat-card stat-red">
+            <div class="stat-icon"><i class="fas fa-thumbs-down"></i></div>
+            <h6>Rejected</h6>
+            <div class="number">{{ requests|selectattr("status", "equalto", "rejected")|list|length }}</div>
+        </div>
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-header">
+        <div class="d-flex justify-content-between align-items-center">
+            <h6 class="card-title mb-0">
+                <i class="fas fa-list text-primary me-2"></i>Approval Requests
+            </h6>
+            <div class="btn-group">
+                <button type="button" class="btn btn-sm btn-outline-secondary active" data-filter="all">All</button>
+                <button type="button" class="btn btn-sm btn-outline-warning" data-filter="pending">Pending</button>
+                <button type="button" class="btn btn-sm btn-outline-success" data-filter="approved">Approved</button>
+                <button type="button" class="btn btn-sm btn-outline-danger" data-filter="rejected">Rejected</button>
+            </div>
+        </div>
+    </div>
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-hover mb-0" id="approvalsTable">
+                <thead>
+                    <tr>
+                        <th>Type</th>
+                        <th>Requester</th>
+                        <th>Description</th>
+                        <th>Status</th>
+                        <th>Priority</th>
+                        <th>Created</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for req in requests %}
+                    <tr data-status="{{ req.status }}">
+                        <td>
+                            <span class="badge bg-{% if req.request_type == 'asset_request' %}info{% elif req.request_type == 'asset_assignment' %}primary{% elif req.request_type == 'access_request' %}warning{% elif req.request_type == 'purchase_request' %}success{% else %}secondary{% endif %}">
+                                {{ req.request_type|replace('_', ' ')|title }}
+                            </span>
+                        </td>
+                        <td>
+                            <div class="d-flex align-items-center">
+                                <i class="fas fa-user-circle text-muted me-2"></i>
+                                {{ req.requester }}
+                            </div>
+                        </td>
+                        <td style="max-width:250px;">
+                            <div class="text-truncate" title="{{ req.description }}">
+                                {{ req.description }}
+                            </div>
+                        </td>
+                        <td>
+                            {% if req.status == 'pending' %}
+                                <span class="badge bg-warning"><i class="fas fa-hourglass-half me-1"></i>Pending</span>
+                            {% elif req.status == 'approved' %}
+                                <span class="badge bg-success"><i class="fas fa-check me-1"></i>Approved</span>
+                            {% elif req.status == 'rejected' %}
+                                <span class="badge bg-danger"><i class="fas fa-times me-1"></i>Rejected</span>
+                            {% else %}
+                                <span class="badge bg-secondary">{{ req.status.title() }}</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if req.priority == 'high' %}
+                                <span class="badge bg-danger">High</span>
+                            {% elif req.priority == 'medium' %}
+                                <span class="badge bg-warning">Medium</span>
+                            {% elif req.priority == 'low' %}
+                                <span class="badge bg-info">Low</span>
+                            {% else %}
+                                <span class="badge bg-secondary">{{ req.priority.title() }}</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <small>{{ req.created_at.strftime('%Y-%m-%d %H:%M') if req.created_at else 'N/A' }}</small>
+                        </td>
+                        <td>
+                            {% if req.status == 'pending' %}
+                            <div class="btn-group">
+                                <form method="POST" action="{{ url_for('admin.approval_action', approval_id=req.id, action='approve') }}" style="display:inline;">
+                                    <button type="submit" class="btn btn-sm btn-outline-success" title="Approve" onclick="return confirm('Approve this request?')">
+                                        <i class="fas fa-check"></i>
+                                    </button>
+                                </form>
+                                <button type="button" class="btn btn-sm btn-outline-danger" title="Reject" data-bs-toggle="modal" data-bs-target="#rejectModal{{ req.id }}">
+                                    <i class="fas fa-times"></i>
+                                </button>
+                            </div>
+
+                            <div class="modal fade" id="rejectModal{{ req.id }}" tabindex="-1">
+                                <div class="modal-dialog">
+                                    <div class="modal-content">
+                                        <div class="modal-header">
+                                            <h5 class="modal-title"><i class="fas fa-comment me-2"></i>Reject Request</h5>
+                                            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                                        </div>
+                                        <form method="POST" action="{{ url_for('admin.approval_action', approval_id=req.id, action='reject') }}">
+                                            <div class="modal-body">
+                                                <div class="mb-3">
+                                                    <label for="comment{{ req.id }}" class="form-label">Comment (required)</label>
+                                                    <textarea class="form-control" id="comment{{ req.id }}" name="comment" rows="3" required placeholder="Provide a reason for rejection..."></textarea>
+                                                </div>
+                                            </div>
+                                            <div class="modal-footer">
+                                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                                                <button type="submit" class="btn btn-danger">
+                                                    <i class="fas fa-times me-1"></i>Reject
+                                                </button>
+                                            </div>
+                                        </form>
+                                    </div>
+                                </div>
+                            </div>
+                            {% else %}
+                            <span class="text-muted">
+                                <small>Processed</small>
+                            </span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td colspan="7" class="text-center py-5">
+                            <div class="text-muted">
+                                <i class="fas fa-check-double fa-3x mb-3"></i>
+                                <h5>No approval requests</h5>
+                                <p>Pending requests will appear here for review.</p>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+<!-- New Approval Request Modal -->
+<div class="modal fade" id="newApprovalModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title"><i class="fas fa-plus-circle me-2"></i>New Approval Request</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <form method="POST" action="{{ url_for('admin.create_approval') }}">
+                <div class="modal-body">
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="request_type" class="form-label">Request Type *</label>
+                            <select class="form-select" id="request_type" name="request_type" required>
+                                <option value="">-- Select Type --</option>
+                                {% for t in approval_types %}
+                                <option value="{{ t }}">{{ t|replace('_', ' ')|title }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="priority" class="form-label">Priority</label>
+                            <select class="form-select" id="priority" name="priority">
+                                <option value="low">Low</option>
+                                <option value="medium" selected>Medium</option>
+                                <option value="high">High</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="requester" class="form-label">Requester *</label>
+                            <select class="form-select" id="requester" name="requester" required>
+                                <option value="">-- Select User --</option>
+                                {% for u in users %}
+                                <option value="{{ u.username }}" {% if u.username == current_user.username %}selected{% endif %}>{{ u.username }}{% if u.department %} ({{ u.department }}){% endif %}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="col-md-3 mb-3">
+                            <label for="entity_type" class="form-label">Entity Type</label>
+                            <input type="text" class="form-control" id="entity_type" name="entity_type" placeholder="e.g., asset, checkout">
+                        </div>
+                        <div class="col-md-3 mb-3">
+                            <label for="entity_id" class="form-label">Entity ID</label>
+                            <input type="number" class="form-control" id="entity_id" name="entity_id" placeholder="ID">
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="description" class="form-label">Description *</label>
+                        <textarea class="form-control" id="description" name="description" rows="3" required placeholder="Describe the approval request..."></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-paper-plane me-1"></i>Submit Request
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const filterBtns = document.querySelectorAll('[data-filter]');
+    const rows = document.querySelectorAll('#approvalsTable tbody tr[data-status]');
+
+    filterBtns.forEach(btn => {
+        btn.addEventListener('click', function() {
+            filterBtns.forEach(b => b.classList.remove('active'));
+            this.classList.add('active');
+            const filter = this.dataset.filter;
+
+            rows.forEach(row => {
+                if (filter === 'all' || row.dataset.status === filter) {
+                    row.style.display = '';
+                } else {
+                    row.style.display = 'none';
+                }
+            });
+        });
+    });
+});
+</script>
+{% endblock %}

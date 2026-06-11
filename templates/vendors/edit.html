@@ -1,0 +1,164 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="page-header">
+    <div class="d-flex justify-content-between align-items-center">
+        <div>
+            <h1 class="mb-2"><i class="fas fa-edit me-3"></i>Edit Vendor</h1>
+            <p class="text-muted mb-0">{{ vendor.vendor_name }}</p>
+        </div>
+        <div>
+            <a href="{{ url_for('vendors.list_vendors') }}" class="btn btn-outline-secondary">
+                <i class="fas fa-arrow-left me-2"></i>Back to Vendors
+            </a>
+        </div>
+    </div>
+</div>
+
+<form method="POST">
+    <div class="row">
+        <div class="col-lg-8">
+            <!-- Company Information -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-info-circle text-primary me-2"></i>Company Information
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="vendor_name" class="form-label">Company Name *</label>
+                            <input type="text" class="form-control" id="vendor_name" name="vendor_name" required value="{{ vendor.vendor_name }}">
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="category" class="form-label">Category</label>
+                            <select class="form-select" id="category" name="category">
+                                <option value="">Select Category</option>
+                                <option value="hardware" {% if vendor.category == 'hardware' %}selected{% endif %}>Hardware</option>
+                                <option value="software" {% if vendor.category == 'software' %}selected{% endif %}>Software</option>
+                                <option value="cloud" {% if vendor.category == 'cloud' %}selected{% endif %}>Cloud Services</option>
+                                <option value="network" {% if vendor.category == 'network' %}selected{% endif %}>Network</option>
+                                <option value="consumables" {% if vendor.category == 'consumables' %}selected{% endif %}>Consumables</option>
+                                <option value="services" {% if vendor.category == 'services' %}selected{% endif %}>Services</option>
+                                <option value="other" {% if vendor.category == 'other' %}selected{% endif %}>Other</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="contact_person" class="form-label">Contact Person</label>
+                            <input type="text" class="form-control" id="contact_person" name="contact_person" value="{{ vendor.contact_person or '' }}">
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="email" class="form-label">Email</label>
+                            <input type="email" class="form-control" id="email" name="email" value="{{ vendor.email or '' }}">
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="phone" class="form-label">Phone</label>
+                            <input type="text" class="form-control" id="phone" name="phone" value="{{ vendor.phone or '' }}">
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="website" class="form-label">Website</label>
+                            <input type="url" class="form-control" id="website" name="website" value="{{ vendor.website or '' }}">
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="address" class="form-label">Address</label>
+                        <textarea class="form-control" id="address" name="address" rows="3">{{ vendor.address or '' }}</textarea>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-4">
+            <!-- Status -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h6 class="card-title mb-0">
+                        <i class="fas fa-toggle-on text-warning me-2"></i>Status
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <label for="status" class="form-label">Vendor Status</label>
+                        <select class="form-select" id="status" name="status">
+                            <option value="active" {% if vendor.status == 'active' %}selected{% endif %}>Active</option>
+                            <option value="inactive" {% if vendor.status == 'inactive' %}selected{% endif %}>Inactive</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Support Information -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h6 class="card-title mb-0">
+                        <i class="fas fa-headset text-info me-2"></i>Support Contacts
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <label for="support_contact" class="form-label">Support Contact</label>
+                        <input type="text" class="form-control" id="support_contact" name="support_contact" value="{{ vendor.support_contact or '' }}">
+                    </div>
+                    <div class="mb-3">
+                        <label for="support_email" class="form-label">Support Email</label>
+                        <input type="email" class="form-control" id="support_email" name="support_email" value="{{ vendor.support_email or '' }}">
+                    </div>
+                    <div class="mb-3">
+                        <label for="support_phone" class="form-label">Support Phone</label>
+                        <input type="text" class="form-control" id="support_phone" name="support_phone" value="{{ vendor.support_phone or '' }}">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Notes -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h6 class="card-title mb-0">
+                        <i class="fas fa-sticky-note text-secondary me-2"></i>Notes
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <label for="notes" class="form-label">Additional Notes</label>
+                        <textarea class="form-control" id="notes" name="notes" rows="6">{{ vendor.notes or '' }}</textarea>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Meta Info -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h6 class="card-title mb-0">
+                        <i class="fas fa-clock text-secondary me-2"></i>Metadata
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <p class="mb-1"><small class="text-muted">Created:</small><br>{{ vendor.created_at.strftime('%Y-%m-%d %H:%M') }}</p>
+                    <p class="mb-0"><small class="text-muted">Updated:</small><br>{{ vendor.updated_at.strftime('%Y-%m-%d %H:%M') if vendor.updated_at else '—' }}</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Action Buttons -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-body">
+                    <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                        <a href="{{ url_for('vendors.list_vendors') }}" class="btn btn-secondary me-md-2">Cancel</a>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-save me-2"></i>Update Vendor
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</form>
+{% endblock %}

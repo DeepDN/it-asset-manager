@@ -5,106 +5,120 @@
     <div class="d-flex justify-content-between align-items-center">
         <div>
             <h1 class="mb-2"><i class="fas fa-tachometer-alt me-3"></i>Dashboard</h1>
-            <p class="text-muted mb-0">Welcome to your IT Asset Management System</p>
+            <p class="text-muted mb-0">IT Asset Management System Overview</p>
         </div>
         <div class="text-end">
-            <small class="text-muted">System Status: <span class="text-success">Online</span></small>
+            <small class="text-muted">
+                <i class="fas fa-sync-alt me-1"></i>Last updated: <span id="last-updated"></span>
+            </small>
+        </div>
+    </div>
+</div>
+
+<script>
+document.getElementById('last-updated').textContent = new Date().toLocaleString();
+</script>
+
+<div class="row mb-4">
+    <div class="col-xl-2 col-md-4 col-sm-6 mb-4">
+        <div class="stat-card stat-blue">
+            <h6>Total Assets</h6>
+            <div class="number">{{ asset_stats.total_assets|default(0) }}</div>
+            <i class="fas fa-laptop stat-icon"></i>
+            <small class="d-block mt-2 opacity-75">All equipment tracked</small>
+        </div>
+    </div>
+    <div class="col-xl-2 col-md-4 col-sm-6 mb-4">
+        <div class="stat-card stat-green">
+            <h6>Assigned</h6>
+            <div class="number">{{ asset_stats.assigned_assets|default(0) }}</div>
+            <i class="fas fa-user-check stat-icon"></i>
+            <small class="d-block mt-2 opacity-75">Currently in use</small>
+        </div>
+    </div>
+    <div class="col-xl-2 col-md-4 col-sm-6 mb-4">
+        <div class="stat-card stat-teal">
+            <h6>In Stock</h6>
+            <div class="number">{{ asset_stats.unassigned_assets|default(0) }}</div>
+            <i class="fas fa-boxes stat-icon"></i>
+            <small class="d-block mt-2 opacity-75">Ready to assign</small>
+        </div>
+    </div>
+    <div class="col-xl-2 col-md-4 col-sm-6 mb-4">
+        <div class="stat-card stat-orange">
+            <h6>Maintenance</h6>
+            <div class="number">{{ asset_stats.maintenance_assets|default(0) }}</div>
+            <i class="fas fa-wrench stat-icon"></i>
+            <small class="d-block mt-2 opacity-75">Under repair</small>
+        </div>
+    </div>
+    <div class="col-xl-2 col-md-4 col-sm-6 mb-4">
+        <div class="stat-card stat-red">
+            <h6>Retired</h6>
+            <div class="number">{{ asset_stats.retired_assets|default(0) }}</div>
+            <i class="fas fa-archive stat-icon"></i>
+            <small class="d-block mt-2 opacity-75">Decommissioned</small>
+        </div>
+    </div>
+    <div class="col-xl-2 col-md-4 col-sm-6 mb-4">
+        <div class="stat-card stat-purple">
+            <h6>Licenses</h6>
+            <div class="number">{{ total_licenses|default(0) }}</div>
+            <i class="fas fa-key stat-icon"></i>
+            <small class="d-block mt-2 opacity-75">Software licenses</small>
         </div>
     </div>
 </div>
 
 <div class="row mb-4">
     <div class="col-xl-3 col-md-6 mb-4">
-        <div class="card card-stats h-100">
-            <div class="card-body p-4">
-                <div class="row align-items-center">
-                    <div class="col">
-                        <h6 class="card-title text-uppercase mb-2" style="font-size: 0.75rem; opacity: 0.8;">Total Assets</h6>
-                        <span class="h2 font-weight-bold mb-0">{{ total_assets }}</span>
-                        <p class="mb-0 mt-2">
-                            <small style="opacity: 0.8;">
-                                <i class="fas fa-chart-line me-1"></i>
-                                All equipment tracked
-                            </small>
-                        </p>
-                    </div>
-                    <div class="col-auto">
-                        <div class="icon-shape stats-icon">
-                            <i class="fas fa-laptop"></i>
-                        </div>
-                    </div>
+        <div class="card h-100">
+            <div class="card-body d-flex align-items-center">
+                <div class="icon-shape bg-light rounded-circle p-3 me-3">
+                    <i class="fas fa-building fa-2x text-primary"></i>
+                </div>
+                <div>
+                    <h3 class="mb-0">{{ total_vendors|default(0) }}</h3>
+                    <small class="text-muted">Total Vendors</small>
                 </div>
             </div>
         </div>
     </div>
-    
     <div class="col-xl-3 col-md-6 mb-4">
-        <div class="card card-stats-success h-100">
-            <div class="card-body p-4">
-                <div class="row align-items-center">
-                    <div class="col">
-                        <h6 class="card-title text-uppercase mb-2" style="font-size: 0.75rem; opacity: 0.8;">Assigned Assets</h6>
-                        <span class="h2 font-weight-bold mb-0">{{ assigned_assets }}</span>
-                        <p class="mb-0 mt-2">
-                            <small style="opacity: 0.8;">
-                                <i class="fas fa-user-check me-1"></i>
-                                Currently in use
-                            </small>
-                        </p>
-                    </div>
-                    <div class="col-auto">
-                        <div class="icon-shape stats-icon">
-                            <i class="fas fa-check-circle"></i>
-                        </div>
-                    </div>
+        <div class="card h-100">
+            <div class="card-body d-flex align-items-center">
+                <div class="icon-shape bg-light rounded-circle p-3 me-3">
+                    <i class="fas fa-exchange-alt fa-2x text-success"></i>
+                </div>
+                <div>
+                    <h3 class="mb-0">{{ active_checkouts|default(0) }}</h3>
+                    <small class="text-muted">Active Checkouts</small>
                 </div>
             </div>
         </div>
     </div>
-    
     <div class="col-xl-3 col-md-6 mb-4">
-        <div class="card card-stats-warning h-100">
-            <div class="card-body p-4">
-                <div class="row align-items-center">
-                    <div class="col">
-                        <h6 class="card-title text-uppercase mb-2" style="font-size: 0.75rem; opacity: 0.8;">Available Assets</h6>
-                        <span class="h2 font-weight-bold mb-0">{{ unassigned_assets }}</span>
-                        <p class="mb-0 mt-2">
-                            <small style="opacity: 0.8;">
-                                <i class="fas fa-box me-1"></i>
-                                Ready for assignment
-                            </small>
-                        </p>
-                    </div>
-                    <div class="col-auto">
-                        <div class="icon-shape stats-icon">
-                            <i class="fas fa-exclamation-circle"></i>
-                        </div>
-                    </div>
+        <div class="card h-100">
+            <div class="card-body d-flex align-items-center">
+                <div class="icon-shape bg-light rounded-circle p-3 me-3">
+                    <i class="fas fa-exclamation-triangle fa-2x text-danger"></i>
+                </div>
+                <div>
+                    <h3 class="mb-0">{{ overdue_checkouts|default(0) }}</h3>
+                    <small class="text-muted">Overdue Checkouts</small>
                 </div>
             </div>
         </div>
     </div>
-    
     <div class="col-xl-3 col-md-6 mb-4">
-        <div class="card card-stats-info h-100">
-            <div class="card-body p-4">
-                <div class="row align-items-center">
-                    <div class="col">
-                        <h6 class="card-title text-uppercase mb-2" style="font-size: 0.75rem; opacity: 0.8;">Active Access</h6>
-                        <span class="h2 font-weight-bold mb-0">{{ total_app_access }}</span>
-                        <p class="mb-0 mt-2">
-                            <small style="opacity: 0.8;">
-                                <i class="fas fa-shield-alt me-1"></i>
-                                Application permissions
-                            </small>
-                        </p>
-                    </div>
-                    <div class="col-auto">
-                        <div class="icon-shape stats-icon">
-                            <i class="fas fa-users-cog"></i>
-                        </div>
-                    </div>
+        <div class="card h-100">
+            <div class="card-body d-flex align-items-center">
+                <div class="icon-shape bg-light rounded-circle p-3 me-3">
+                    <i class="fas fa-shield-alt fa-2x text-info"></i>
+                </div>
+                <div>
+                    <h3 class="mb-0">{{ asset_stats.expiring_warranties|default(0) }}</h3>
+                    <small class="text-muted">Warranties (30d)</small>
                 </div>
             </div>
         </div>
@@ -114,76 +128,106 @@
 <div class="row">
     <div class="col-lg-8 mb-4">
         <div class="card h-100">
-            <div class="card-header">
+            <div class="card-header d-flex justify-content-between align-items-center">
                 <h5 class="card-title mb-0">
                     <i class="fas fa-bolt text-primary me-2"></i>Quick Actions
                 </h5>
+                <span class="badge bg-primary rounded-pill">8</span>
             </div>
-            <div class="card-body">
-                <div class="row">
-                    <div class="col-md-6 mb-3">
-                        <a href="{{ url_for('add_asset') }}" class="btn btn-primary w-100 py-3">
-                            <i class="fas fa-plus-circle me-2"></i>
-                            <div>
-                                <strong>Add New Asset</strong>
-                                <br><small>Register new equipment</small>
-                            </div>
+            <div class="card-body p-4">
+                <div class="row g-3">
+                    <div class="col-md-3 col-6">
+                        <a href="{{ url_for('admin.add_user') }}" class="text-decoration-none d-block stat-card stat-blue" style="cursor:pointer;">
+                            <h6 class="text-uppercase small fw-semibold"><i class="fas fa-user-plus me-1"></i> Add User</h6>
+                            <div class="number" style="font-size:1.1rem;font-weight:600;">Create Account</div>
+                            <i class="fas fa-users stat-icon"></i>
                         </a>
                     </div>
-                    <div class="col-md-6 mb-3">
-                        <a href="{{ url_for('add_app_access') }}" class="btn btn-outline-primary w-100 py-3">
-                            <i class="fas fa-user-plus me-2"></i>
-                            <div>
-                                <strong>Grant App Access</strong>
-                                <br><small>Assign application permissions</small>
-                            </div>
+                    <div class="col-md-3 col-6">
+                        <a href="{{ url_for('access.list_application_access') }}" class="text-decoration-none d-block stat-card stat-purple" style="cursor:pointer;">
+                            <h6 class="text-uppercase small fw-semibold"><i class="fas fa-users-cog me-1"></i> Access</h6>
+                            <div class="number" style="font-size:1.1rem;font-weight:600;">Manage Permissions</div>
+                            <i class="fas fa-shield-alt stat-icon"></i>
                         </a>
                     </div>
-                    <div class="col-md-6 mb-3">
-                        <a href="{{ url_for('add_github_access') }}" class="btn btn-outline-primary w-100 py-3">
-                            <i class="fab fa-github me-2"></i>
-                            <div>
-                                <strong>Add GitHub Access</strong>
-                                <br><small>Manage repository permissions</small>
-                            </div>
+                    <div class="col-md-3 col-6">
+                        <a href="{{ url_for('assets.add_asset') }}" class="text-decoration-none d-block stat-card stat-green" style="cursor:pointer;">
+                            <h6 class="text-uppercase small fw-semibold"><i class="fas fa-plus-circle me-1"></i> Add Asset</h6>
+                            <div class="number" style="font-size:1.1rem;font-weight:600;">Register Equipment</div>
+                            <i class="fas fa-laptop stat-icon"></i>
                         </a>
                     </div>
-                    <div class="col-md-6 mb-3">
-                        <a href="{{ url_for('assets') }}" class="btn btn-outline-primary w-100 py-3">
-                            <i class="fas fa-search me-2"></i>
-                            <div>
-                                <strong>View All Assets</strong>
-                                <br><small>Browse and manage inventory</small>
-                            </div>
+                    <div class="col-md-3 col-6">
+                        <a href="{{ url_for('assets.bulk_upload') }}" class="text-decoration-none d-block stat-card stat-teal" style="cursor:pointer;">
+                            <h6 class="text-uppercase small fw-semibold"><i class="fas fa-upload me-1"></i> Bulk Upload</h6>
+                            <div class="number" style="font-size:1.1rem;font-weight:600;">Import via CSV</div>
+                            <i class="fas fa-file-csv stat-icon"></i>
+                        </a>
+                    </div>
+                    <div class="col-md-3 col-6">
+                        <a href="{{ url_for('lifecycle.checkout_asset') }}" class="text-decoration-none d-block stat-card stat-orange" style="cursor:pointer;">
+                            <h6 class="text-uppercase small fw-semibold"><i class="fas fa-exchange-alt me-1"></i> Checkout</h6>
+                            <div class="number" style="font-size:1.1rem;font-weight:600;">Assign to User</div>
+                            <i class="fas fa-sign-out-alt stat-icon"></i>
+                        </a>
+                    </div>
+                    <div class="col-md-3 col-6">
+                        <a href="{{ url_for('licenses.add_license') }}" class="text-decoration-none d-block stat-card stat-red" style="cursor:pointer;">
+                            <h6 class="text-uppercase small fw-semibold"><i class="fas fa-key me-1"></i> License</h6>
+                            <div class="number" style="font-size:1.1rem;font-weight:600;">Add Software License</div>
+                            <i class="fas fa-key stat-icon"></i>
+                        </a>
+                    </div>
+                    <div class="col-md-3 col-6">
+                        <a href="{{ url_for('vendors.add_vendor') }}" class="text-decoration-none d-block stat-card bg-secondary" style="cursor:pointer;background:linear-gradient(135deg,#455a64,#78909c) !important;">
+                            <h6 class="text-uppercase small fw-semibold"><i class="fas fa-building me-1"></i> Vendor</h6>
+                            <div class="number" style="font-size:1.1rem;font-weight:600;">New Vendor Entry</div>
+                            <i class="fas fa-building stat-icon"></i>
+                        </a>
+                    </div>
+                    <div class="col-md-3 col-6">
+                        <a href="{{ url_for('reports.executive_dashboard') }}" class="text-decoration-none d-block stat-card stat-blue" style="cursor:pointer;">
+                            <h6 class="text-uppercase small fw-semibold"><i class="fas fa-chart-pie me-1"></i> Reports</h6>
+                            <div class="number" style="font-size:1.1rem;font-weight:600;">Analytics &amp; Audit</div>
+                            <i class="fas fa-chart-line stat-icon"></i>
                         </a>
                     </div>
                 </div>
             </div>
         </div>
     </div>
-    
     <div class="col-lg-4 mb-4">
         <div class="card h-100">
             <div class="card-header">
                 <h5 class="card-title mb-0">
-                    <i class="fas fa-download text-success me-2"></i>Export Center
+                    <i class="fas fa-clock text-info me-2"></i>Recent Activity
                 </h5>
             </div>
             <div class="card-body">
-                <div class="d-grid gap-3">
-                    <a href="{{ url_for('export_assets') }}" class="btn btn-outline-info">
-                        <i class="fas fa-file-csv me-2"></i>Assets Report
-                        <small class="d-block text-dark">Complete inventory export</small>
-                    </a>
-                    <a href="{{ url_for('export_app_access') }}" class="btn btn-outline-info">
-                        <i class="fas fa-file-csv me-2"></i>Access Report
-                        <small class="d-block text-dark">Application permissions audit</small>
-                    </a>
-                    <a href="{{ url_for('export_github_access') }}" class="btn btn-outline-info">
-                        <i class="fas fa-file-csv me-2"></i>GitHub Report
-                        <small class="d-block text-dark">Repository access audit</small>
-                    </a>
-                </div>
+                {% if recent_activity %}
+                    <ul class="list-unstyled mb-0">
+                        {% for activity in recent_activity %}
+                        <li class="py-2 border-bottom border-light">
+                            <div class="d-flex align-items-center">
+                                <div class="me-3">
+                                    <i class="fas fa-circle text-{{ activity.color or 'primary' }}" style="font-size: 0.5rem;"></i>
+                                </div>
+                                <div class="flex-grow-1">
+                                    <strong>{{ activity.action }}</strong>
+                                    <small class="d-block text-muted">{{ activity.description }}</small>
+                                </div>
+                                <small class="text-muted ms-2">{{ activity.time }}</small>
+                            </div>
+                        </li>
+                        {% endfor %}
+                    </ul>
+                {% else %}
+                    <div class="text-center py-5">
+                        <i class="fas fa-inbox fa-3x text-muted mb-3"></i>
+                        <h6 class="text-muted">No Recent Activity</h6>
+                        <p class="text-muted small mb-0">Activity will appear here as actions are performed.</p>
+                    </div>
+                {% endif %}
             </div>
         </div>
     </div>
@@ -192,7 +236,7 @@
 <div class="row">
     <div class="col-12">
         <div class="card">
-            <div class="card-header">
+            <div class="card-header d-flex justify-content-between align-items-center">
                 <h5 class="card-title mb-0">
                     <i class="fas fa-chart-bar text-info me-2"></i>System Overview
                 </h5>
@@ -201,30 +245,30 @@
                 <div class="row text-center">
                     <div class="col-md-3 mb-3">
                         <div class="p-3">
-                            <i class="fab fa-github fa-2x text-dark mb-2"></i>
-                            <h4 class="mb-1">{{ total_github_access }}</h4>
-                            <small class="text-muted">GitHub Access Records</small>
-                        </div>
-                    </div>
-                    <div class="col-md-3 mb-3">
-                        <div class="p-3">
-                            <i class="fas fa-users-cog fa-2x text-primary mb-2"></i>
-                            <h4 class="mb-1">{{ total_app_access }}</h4>
-                            <small class="text-muted">Application Access Records</small>
-                        </div>
-                    </div>
-                    <div class="col-md-3 mb-3">
-                        <div class="p-3">
-                            <i class="fas fa-laptop fa-2x text-success mb-2"></i>
-                            <h4 class="mb-1">{{ total_assets }}</h4>
+                            <i class="fas fa-laptop fa-2x text-primary mb-2"></i>
+                            <h4 class="mb-1">{{ asset_stats.total_assets|default(0) }}</h4>
                             <small class="text-muted">Total IT Assets</small>
                         </div>
                     </div>
                     <div class="col-md-3 mb-3">
                         <div class="p-3">
-                            <i class="fas fa-shield-alt fa-2x text-warning mb-2"></i>
-                            <h4 class="mb-1">{{ (total_app_access + total_github_access) }}</h4>
-                            <small class="text-muted">Total Access Permissions</small>
+                            <i class="fas fa-key fa-2x text-warning mb-2"></i>
+                            <h4 class="mb-1">{{ total_licenses|default(0) }}</h4>
+                            <small class="text-muted">Software Licenses</small>
+                        </div>
+                    </div>
+                    <div class="col-md-3 mb-3">
+                        <div class="p-3">
+                            <i class="fas fa-building fa-2x text-success mb-2"></i>
+                            <h4 class="mb-1">{{ total_vendors|default(0) }}</h4>
+                            <small class="text-muted">Registered Vendors</small>
+                        </div>
+                    </div>
+                    <div class="col-md-3 mb-3">
+                        <div class="p-3">
+                            <i class="fas fa-users-cog fa-2x text-info mb-2"></i>
+                            <h4 class="mb-1">{{ access_stats.application_access.active|default(0) }}</h4>
+                            <small class="text-muted">Active App Access</small>
                         </div>
                     </div>
                 </div>

@@ -1,0 +1,151 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="page-header">
+    <div class="d-flex justify-content-between align-items-center">
+        <div>
+            <h1 class="mb-2"><i class="fas fa-map-marker-alt me-3"></i>Locations</h1>
+            <p class="text-muted mb-0">Manage physical locations for asset deployment</p>
+        </div>
+        <div>
+            <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addLocationModal">
+                <i class="fas fa-plus me-2"></i>Add Location
+            </button>
+        </div>
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-header">
+        <h6 class="card-title mb-0">
+            <i class="fas fa-list text-primary me-2"></i>All Locations
+            <span class="badge bg-primary ms-2">{{ locations|length }} locations</span>
+        </h6>
+    </div>
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-hover mb-0">
+                <thead>
+                    <tr>
+                        <th>Country</th>
+                        <th>Region</th>
+                        <th>Office</th>
+                        <th>Building</th>
+                        <th>Floor</th>
+                        <th>Room</th>
+                        <th>Full Path</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for loc in locations %}
+                    <tr>
+                        <td>{{ loc.country or '-' }}</td>
+                        <td>{{ loc.region or '-' }}</td>
+                        <td>{{ loc.office or '-' }}</td>
+                        <td>{{ loc.building or '-' }}</td>
+                        <td>{{ loc.floor or '-' }}</td>
+                        <td>{{ loc.room or '-' }}</td>
+                        <td><code>{{ loc.full_path }}</code></td>
+                        <td>
+                            {% if loc.status == 'active' %}
+                                <span class="badge bg-success">Active</span>
+                            {% else %}
+                                <span class="badge bg-secondary">{{ loc.status.title() if loc.status else 'N/A' }}</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td colspan="8" class="text-center py-5">
+                            <div class="text-muted">
+                                <i class="fas fa-map-marker-alt fa-3x mb-3"></i>
+                                <h5>No locations defined</h5>
+                                <p>Add your first location to start organizing assets by physical location.</p>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="addLocationModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title"><i class="fas fa-plus-circle me-2"></i>Add Location</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <form method="POST" action="{{ url_for('admin.add_location') }}">
+                <div class="modal-body">
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label for="country" class="form-label">Country</label>
+                            <input type="text" class="form-control" id="country" name="country" placeholder="e.g. USA">
+                        </div>
+                        <div class="col-md-6">
+                            <label for="region" class="form-label">Region/State</label>
+                            <input type="text" class="form-control" id="region" name="region" placeholder="e.g. California">
+                        </div>
+                    </div>
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label for="office" class="form-label">Office</label>
+                            <input type="text" class="form-control" id="office" name="office" placeholder="e.g. HQ">
+                        </div>
+                        <div class="col-md-6">
+                            <label for="building" class="form-label">Building</label>
+                            <input type="text" class="form-control" id="building" name="building" placeholder="e.g. Building A">
+                        </div>
+                    </div>
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label for="floor" class="form-label">Floor</label>
+                            <input type="text" class="form-control" id="floor" name="floor" placeholder="e.g. 3rd">
+                        </div>
+                        <div class="col-md-6">
+                            <label for="room" class="form-label">Room</label>
+                            <input type="text" class="form-control" id="room" name="room" placeholder="e.g. 3A">
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Full Path Preview</label>
+                        <div id="pathPreview" class="p-3 bg-light rounded text-muted">
+                            Enter location details to see full path
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                        <i class="fas fa-times me-1"></i>Cancel
+                    </button>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-save me-1"></i>Save Location
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const fields = ['country', 'region', 'office', 'building', 'floor', 'room'];
+    const preview = document.getElementById('pathPreview');
+
+    function updatePreview() {
+        const parts = fields.map(id => document.getElementById(id).value).filter(v => v.trim());
+        preview.textContent = parts.length ? parts.join(' / ') : 'Enter location details to see full path';
+    }
+
+    fields.forEach(id => {
+        document.getElementById(id).addEventListener('input', updatePreview);
+    });
+});
+</script>
+{% endblock %}

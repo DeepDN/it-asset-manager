@@ -9,14 +9,14 @@
         </div>
         <div>
             <div class="btn-group me-2" role="group">
-                <a href="{{ url_for('export_assets') }}" class="btn btn-success">
+                <a href="{{ url_for('assets.export_assets') }}" class="btn btn-success">
                     <i class="fas fa-download me-2"></i>Export CSV
                 </a>
-                <a href="{{ url_for('bulk_upload_assets') }}" class="btn btn-info">
+                <a href="{{ url_for('assets.bulk_upload') }}" class="btn btn-info">
                     <i class="fas fa-upload me-2"></i>Bulk Upload
                 </a>
             </div>
-            <a href="{{ url_for('add_asset') }}" class="btn btn-primary">
+            <a href="{{ url_for('assets.add_asset') }}" class="btn btn-primary">
                 <i class="fas fa-plus me-2"></i>Add New Asset
             </a>
         </div>
@@ -260,12 +260,18 @@
                         </td>
                         <td>
                             <div class="btn-group" role="group">
-                                <a href="{{ url_for('edit_asset', id=asset.id) }}" class="btn btn-sm btn-outline-primary" title="Edit Asset">
+                                <a href="{{ url_for('assets.edit_asset', asset_id=asset.id) }}" class="btn btn-sm btn-outline-primary" title="Edit Asset">
                                     <i class="fas fa-edit"></i>
                                 </a>
                                 <button class="btn btn-sm btn-outline-info" title="View Details" onclick="showAssetDetails({{ asset.id }})">
                                     <i class="fas fa-eye"></i>
                                 </button>
+                                <a href="{{ url_for('assets.qr_code_image', asset_tag=asset.asset_tag) }}" class="btn btn-sm btn-outline-dark" title="QR Code" target="_blank">
+                                    <i class="fas fa-qrcode"></i>
+                                </a>
+                                <a href="{{ url_for('assets.barcode_image', asset_tag=asset.asset_tag) }}" class="btn btn-sm btn-outline-secondary" title="Barcode" target="_blank">
+                                    <i class="fas fa-barcode"></i>
+                                </a>
                             </div>
                         </td>
                     </tr>
@@ -275,7 +281,7 @@
                             <div class="text-muted">
                                 <i class="fas fa-inbox fa-3x mb-3"></i>
                                 <h5>No assets found</h5>
-                                <p>Try adjusting your filters or <a href="{{ url_for('add_asset') }}">add a new asset</a></p>
+                                <p>Try adjusting your filters or <a href="{{ url_for('assets.add_asset') }}">add a new asset</a></p>
                             </div>
                         </td>
                     </tr>

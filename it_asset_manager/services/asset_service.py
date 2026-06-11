@@ -270,10 +270,10 @@ class AssetService:
         """
         try:
             total_assets = Asset.query.count()
-            assigned_assets = Asset.query.filter_by(status='assigned').count()
-            unassigned_assets = Asset.query.filter_by(status='unassigned').count()
-            maintenance_assets = Asset.query.filter_by(status='maintenance').count()
-            retired_assets = Asset.query.filter_by(status='retired').count()
+            assigned_assets = Asset.query.filter_by(lifecycle_stage='assigned').count()
+            unassigned_assets = Asset.query.filter_by(lifecycle_stage='in_stock').count()
+            maintenance_assets = Asset.query.filter_by(lifecycle_stage='under_maintenance').count()
+            retired_assets = Asset.query.filter_by(lifecycle_stage='retired').count()
             
             # Assets by type
             asset_types = db.session.query(

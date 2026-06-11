@@ -1,0 +1,299 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="page-header">
+    <div class="d-flex justify-content-between align-items-center">
+        <div>
+            <h1 class="mb-2"><i class="fas fa-certificate me-3"></i>{{ lic.license_name }}</h1>
+            <p class="text-muted mb-0">License details and assignment management</p>
+        </div>
+        <div>
+            <a href="{{ url_for('licenses.edit_license', id=lic.id) }}" class="btn btn-primary me-2">
+                <i class="fas fa-edit me-2"></i>Edit License
+            </a>
+            <a href="{{ url_for('licenses.list_licenses') }}" class="btn btn-outline-secondary">
+                <i class="fas fa-arrow-left me-2"></i>Back to Licenses
+            </a>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-lg-8">
+        <!-- License Details -->
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5 class="card-title mb-0">
+                    <i class="fas fa-info-circle text-primary me-2"></i>License Information
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <table class="table table-borderless mb-0">
+                            <tr>
+                                <td class="text-muted ps-0" style="width: 140px;">License Name</td>
+                                <td class="fw-bold">{{ lic.license_name }}</td>
+                            </tr>
+                            <tr>
+                                <td class="text-muted ps-0">License Key</td>
+                                <td>
+                                    {% if lic.license_key %}
+                                    <code>{{ lic.license_key }}</code>
+                                    {% else %}
+                                    <span class="text-muted">—</span>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="text-muted ps-0">Publisher</td>
+                                <td>{{ lic.publisher or '—' }}</td>
+                            </tr>
+                            <tr>
+                                <td class="text-muted ps-0">Version</td>
+                                <td>{{ lic.version or '—' }}</td>
+                            </tr>
+                            <tr>
+                                <td class="text-muted ps-0">License Type</td>
+                                <td><span class="badge bg-info">{{ lic.license_type.title() }}</span></td>
+                            </tr>
+                            <tr>
+                                <td class="text-muted ps-0">Status</td>
+                                <td>
+                                    {% if lic.status == 'active' %}
+                                    <span class="badge bg-success">Active</span>
+                                    {% elif lic.status == 'expired' %}
+                                    <span class="badge bg-danger">Expired</span>
+                                    {% else %}
+                                    <span class="badge bg-warning">{{ lic.status.title() }}</span>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                        </table>
+                    </div>
+                    <div class="col-md-6">
+                        <table class="table table-borderless mb-0">
+                            <tr>
+                                <td class="text-muted ps-0" style="width: 140px;">Total Seats</td>
+                                <td class="fw-bold">{{ lic.total_seats }}</td>
+                            </tr>
+                            <tr>
+                                <td class="text-muted ps-0">Assigned Seats</td>
+                                <td>{{ lic.assigned_seats }}</td>
+                            </tr>
+                            <tr>
+                                <td class="text-muted ps-0">Available Seats</td>
+                                <td class="{% if lic.available_seats > 0 %}text-success fw-bold{% else %}text-danger fw-bold{% endif %}">
+                                    {{ lic.available_seats }}
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="text-muted ps-0">Purchase Date</td>
+                                <td>{{ lic.purchase_date.strftime('%Y-%m-%d') if lic.purchase_date else '—' }}</td>
+                            </tr>
+                            <tr>
+                                <td class="text-muted ps-0">Purchase Cost</td>
+                                <td>{% if lic.purchase_cost %}${{ "%.2f"|format(lic.purchase_cost) }}{% else %}—{% endif %}</td>
+                            </tr>
+                            <tr>
+                                <td class="text-muted ps-0">Expiration Date</td>
+                                <td>
+                                    {% if lic.expiration_date %}
+                                    {{ lic.expiration_date.strftime('%Y-%m-%d') }}
+                                    {% if lic.is_expired %}
+                                    <span class="badge bg-danger ms-2">Expired</span>
+                                    {% endif %}
+                                    {% else %}
+                                    <span class="text-muted">Never expires</span>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Vendor Info -->
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5 class="card-title mb-0">
+                    <i class="fas fa-building text-success me-2"></i>Vendor Information
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <table class="table table-borderless mb-0">
+                            <tr>
+                                <td class="text-muted ps-0" style="width: 140px;">Vendor Name</td>
+                                <td>{{ lic.vendor_name or '—' }}</td>
+                            </tr>
+                            <tr>
+                                <td class="text-muted ps-0">Vendor Contact</td>
+                                <td>{{ lic.vendor_contact or '—' }}</td>
+                            </tr>
+                        </table>
+                    </div>
+                    <div class="col-md-6">
+                        <table class="table table-borderless mb-0">
+                            <tr>
+                                <td class="text-muted ps-0" style="width: 140px;">Support Expiry</td>
+                                <td>{{ lic.support_expiry.strftime('%Y-%m-%d') if lic.support_expiry else '—' }}</td>
+                            </tr>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Notes -->
+        {% if lic.notes %}
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5 class="card-title mb-0">
+                    <i class="fas fa-sticky-note text-secondary me-2"></i>Notes
+                </h5>
+            </div>
+            <div class="card-body">
+                <p class="mb-0">{{ lic.notes }}</p>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+
+    <div class="col-lg-4">
+        <!-- Utilization Card -->
+        <div class="card mb-4">
+            <div class="card-header">
+                <h6 class="card-title mb-0">
+                    <i class="fas fa-chart-pie text-info me-2"></i>Seat Utilization
+                </h6>
+            </div>
+            <div class="card-body">
+                <div class="text-center mb-3">
+                    <h2 class="display-4 fw-bold {% if lic.utilization_percent > 80 %}text-danger{% elif lic.utilization_percent > 50 %}text-warning{% else %}text-success{% endif %}">
+                        {{ lic.utilization_percent }}%
+                    </h2>
+                    <p class="text-muted mb-0">Utilized</p>
+                </div>
+                <div class="progress mb-3" style="height: 12px;">
+                    <div class="progress-bar bg-{% if lic.utilization_percent > 80 %}danger{% elif lic.utilization_percent > 50 %}warning{% else %}success{% endif %}" 
+                         role="progressbar" style="width: {{ lic.utilization_percent }}%">
+                    </div>
+                </div>
+                <div class="d-flex justify-content-between text-small">
+                    <span><strong>{{ lic.assigned_seats }}</strong> assigned</span>
+                    <span><strong>{{ lic.available_seats }}</strong> available</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Quick Assign -->
+        {% if lic.status == 'active' and lic.available_seats > 0 %}
+        <div class="card mb-4">
+            <div class="card-header">
+                <h6 class="card-title mb-0">
+                    <i class="fas fa-user-plus text-success me-2"></i>Assign License
+                </h6>
+            </div>
+            <div class="card-body">
+                <form method="POST" action="{{ url_for('licenses.assign_license', id=lic.id) }}">
+                    <div class="mb-3">
+                        <label for="assigned_to" class="form-label">User *</label>
+                        <input type="text" class="form-control" id="assigned_to" name="assigned_to" required placeholder="Enter username or email">
+                    </div>
+                    <div class="d-grid">
+                        <button type="submit" class="btn btn-success">
+                            <i class="fas fa-check me-2"></i>Assign Seat
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- Meta Info -->
+        <div class="card mb-4">
+            <div class="card-header">
+                <h6 class="card-title mb-0">
+                    <i class="fas fa-clock text-secondary me-2"></i>Metadata
+                </h6>
+            </div>
+            <div class="card-body">
+                <p class="mb-1"><small class="text-muted">Created:</small><br>{{ lic.created_at.strftime('%Y-%m-%d %H:%M') }}</p>
+                <p class="mb-0"><small class="text-muted">Updated:</small><br>{{ lic.updated_at.strftime('%Y-%m-%d %H:%M') if lic.updated_at else '—' }}</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Assignments Table -->
+<div class="card">
+    <div class="card-header">
+        <h5 class="card-title mb-0">
+            <i class="fas fa-users text-primary me-2"></i>License Assignments
+            <span class="badge bg-primary ms-2">{{ assignments|length }}</span>
+        </h5>
+    </div>
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-hover mb-0">
+                <thead>
+                    <tr>
+                        <th>Assigned To</th>
+                        <th>Assigned Date</th>
+                        <th>Revoked Date</th>
+                        <th>Status</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for assignment in assignments %}
+                    <tr>
+                        <td>
+                            <div class="d-flex align-items-center">
+                                <i class="fas fa-user-circle fa-lg text-primary me-2"></i>
+                                <span class="fw-bold">{{ assignment.assigned_to }}</span>
+                            </div>
+                        </td>
+                        <td>{{ assignment.assigned_date.strftime('%Y-%m-%d') if assignment.assigned_date else '—' }}</td>
+                        <td>{{ assignment.revoked_date.strftime('%Y-%m-%d') if assignment.revoked_date else '—' }}</td>
+                        <td>
+                            {% if assignment.status == 'active' %}
+                            <span class="badge bg-success">Active</span>
+                            {% else %}
+                            <span class="badge bg-secondary">Revoked</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if assignment.status == 'active' %}
+                            <form method="POST" action="{{ url_for('licenses.revoke_license', assignment_id=assignment.id) }}" class="d-inline" onsubmit="return confirm('Revoke this license assignment?')">
+                                <button type="submit" class="btn btn-sm btn-outline-danger" title="Revoke License">
+                                    <i class="fas fa-times"></i> Revoke
+                                </button>
+                            </form>
+                            {% else %}
+                            <span class="text-muted">—</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td colspan="5" class="text-center py-4">
+                            <div class="text-muted">
+                                <i class="fas fa-user-slash fa-2x mb-2"></i>
+                                <p class="mb-0">No assignments yet</p>
+                                {% if lic.status == 'active' and lic.available_seats > 0 %}
+                                <small>Use the assign form to allocate a seat</small>
+                                {% endif %}
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

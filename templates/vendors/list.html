@@ -1,0 +1,135 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="page-header">
+    <div class="d-flex justify-content-between align-items-center">
+        <div>
+            <h1 class="mb-2"><i class="fas fa-building me-3"></i>Vendors</h1>
+            <p class="text-muted mb-0">Manage vendors, suppliers, and support contacts</p>
+        </div>
+        <div>
+            <a href="{{ url_for('vendors.add_vendor') }}" class="btn btn-primary">
+                <i class="fas fa-plus me-2"></i>Add Vendor
+            </a>
+        </div>
+    </div>
+</div>
+
+<!-- Vendor Stats -->
+<div class="row mb-4">
+    <div class="col-md-4">
+        <div class="card stat-card stat-blue">
+            <h6>Total Vendors</h6>
+            <div class="number">{{ vendors|length }}</div>
+            <i class="fas fa-building stat-icon"></i>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card stat-card stat-green">
+            <h6>Active</h6>
+            <div class="number">{{ vendors|selectattr("status", "equalto", "active")|list|length }}</div>
+            <i class="fas fa-check-circle stat-icon"></i>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card stat-card stat-red">
+            <h6>Inactive</h6>
+            <div class="number">{{ vendors|selectattr("status", "equalto", "inactive")|list|length }}</div>
+            <i class="fas fa-ban stat-icon"></i>
+        </div>
+    </div>
+</div>
+
+<!-- Vendors Table -->
+<div class="card">
+    <div class="card-header">
+        <h6 class="card-title mb-0">
+            <i class="fas fa-list text-primary me-2"></i>Vendor Directory
+        </h6>
+    </div>
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-hover mb-0">
+                <thead>
+                    <tr>
+                        <th>Company Name</th>
+                        <th>Contact</th>
+                        <th>Email</th>
+                        <th>Phone</th>
+                        <th>Category</th>
+                        <th>Status</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for vendor in vendors %}
+                    <tr>
+                        <td>
+                            <div class="d-flex align-items-center">
+                                <div class="me-3">
+                                    <div class="icon-shape bg-light" style="width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; border-radius: 8px;">
+                                        <i class="fas fa-building text-primary"></i>
+                                    </div>
+                                </div>
+                                <div>
+                                    <span class="fw-bold">{{ vendor.vendor_name }}</span>
+                                    {% if vendor.website %}
+                                    <br><small class="text-muted"><i class="fas fa-globe me-1"></i>{{ vendor.website }}</small>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </td>
+                        <td>{{ vendor.contact_person or '—' }}</td>
+                        <td>
+                            {% if vendor.email %}
+                            <a href="mailto:{{ vendor.email }}" class="text-decoration-none">{{ vendor.email }}</a>
+                            {% else %}
+                            <span class="text-muted">—</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if vendor.phone %}
+                            <a href="tel:{{ vendor.phone }}" class="text-decoration-none">{{ vendor.phone }}</a>
+                            {% else %}
+                            <span class="text-muted">—</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if vendor.category %}
+                            <span class="badge bg-info">{{ vendor.category }}</span>
+                            {% else %}
+                            <span class="text-muted">—</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if vendor.status == 'active' %}
+                            <span class="badge bg-success"><i class="fas fa-check me-1"></i>Active</span>
+                            {% else %}
+                            <span class="badge bg-secondary"><i class="fas fa-ban me-1"></i>Inactive</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <div class="btn-group" role="group">
+                                <a href="{{ url_for('vendors.edit_vendor', id=vendor.id) }}" class="btn btn-sm btn-outline-primary" title="Edit Vendor">
+                                    <i class="fas fa-edit"></i>
+                                </a>
+                            </div>
+                        </td>
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td colspan="7" class="text-center py-5">
+                            <div class="text-muted">
+                                <i class="fas fa-inbox fa-3x mb-3"></i>
+                                <h5>No vendors found</h5>
+                                <p><a href="{{ url_for('vendors.add_vendor') }}">Add your first vendor</a></p>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,6 +1,5 @@
 # IT Asset Manager - .gitignore
 # Created by Deepak Nemade
-# LinkedIn: https://www.linkedin.com/in/deepak-nemade/
 
 # Python
 __pycache__/
@@ -74,11 +73,7 @@ ehthumbs.db
 Thumbs.db
 
 # Backup files
-backups/*.db
-backups/*.csv
-backups/*.tar.gz
-backups/*.sql
-backups/*.dump
+backups/
 *.backup
 
 # Temporary files
@@ -177,15 +172,3 @@ k6-results/
 trivy-results.sarif
 bandit-report.json
 docker-bench-results.txt
-
-# Keep important files
-!requirements.txt
-!setup.sh
-!backup.sh
-!migrate_*.py
-!add_sample_data.py
-!update_password.py
-!README.md
-!LICENSE
-!CHANGELOG.md
-!INSTALLATION.md

@@ -73,8 +73,8 @@ class Asset(db.Model):
     remove_date = db.Column(db.Date)
     location = db.Column(db.String(100), index=True)
     
-    # Status and condition
-    status = db.Column(db.String(20), default='unassigned', nullable=False, index=True)
+    # Lifecycle and condition
+    lifecycle_stage = db.Column(db.String(20), default='in_stock', nullable=False, index=True)
     condition = db.Column(db.String(20), default='good', nullable=False, index=True)
     
     # Additional information
@@ -84,79 +84,83 @@ class Asset(db.Model):
     created_at = db.Column(db.DateTime, default=datetime.utcnow, nullable=False)
     updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow, nullable=False)
     
+    ALLOWED_TRANSITIONS = {
+        'requested': ['purchased', 'cancelled'],
+        'purchased': ['in_stock', 'retired'],
+        'in_stock': ['assigned', 'retired', 'disposed'],
+        'assigned': ['in_stock', 'under_maintenance', 'returned', 'retired'],
+        'under_maintenance': ['in_stock', 'assigned', 'retired'],
+        'returned': ['in_stock', 'retired'],
+        'retired': ['disposed'],
+        'disposed': []
+    }
+
     def __repr__(self) -> str:
-        """String representation of Asset object."""
         return f'<Asset {self.asset_tag}: {self.asset_type}>'
-    
+
+    @property
+    def status(self) -> str:
+        return self.lifecycle_stage
+
+    @status.setter
+    def status(self, value: str):
+        self.lifecycle_stage = value
+
     @property
     def is_assigned(self) -> bool:
-        """Check if asset is currently assigned."""
-        return self.status == 'assigned' and self.assigned_to is not None
-    
+        return self.lifecycle_stage == 'assigned' and self.assigned_to is not None
+
     @property
     def is_rental(self) -> bool:
-        """Check if asset is rented."""
         return self.ownership_type in ['rented', 'leased']
-    
+
     @property
     def is_warranty_expired(self) -> bool:
-        """Check if warranty has expired."""
         if not self.warranty_expiry:
             return False
         return date.today() > self.warranty_expiry
-    
+
     @property
     def rental_days_remaining(self) -> Optional[int]:
-        """Calculate remaining rental days."""
         if not self.is_rental or not self.rental_end_date:
             return None
-        
         remaining = (self.rental_end_date - date.today()).days
         return max(0, remaining)
-    
+
+    def can_transition_to(self, new_stage: str) -> bool:
+        allowed = self.ALLOWED_TRANSITIONS.get(self.lifecycle_stage, [])
+        return new_stage in allowed
+
+    def transition_to(self, new_stage: str, user: Optional[str] = None) -> bool:
+        if not self.can_transition_to(new_stage):
+            return False
+        old_stage = self.lifecycle_stage
+        self.lifecycle_stage = new_stage
+        self.updated_at = datetime.utcnow()
+        return True
+
     def assign_to_user(self, username: str, location: Optional[str] = None) -> None:
-        """
-        Assign asset to a user.
-        
-        Args:
-            username: Username to assign asset to
-            location: Optional location information
-        """
         self.assigned_to = username
         self.assign_date = date.today()
         self.remove_date = None
-        self.status = 'assigned'
+        self.lifecycle_stage = 'assigned'
         if location:
             self.location = location
         self.updated_at = datetime.utcnow()
-    
+
     def unassign(self) -> None:
-        """Unassign asset from current user."""
         self.remove_date = date.today()
-        self.status = 'unassigned'
+        self.lifecycle_stage = 'in_stock'
         self.updated_at = datetime.utcnow()
-        # Keep assigned_to for history, but could be cleared if needed
-    
+
     def set_maintenance_mode(self, remarks: Optional[str] = None) -> None:
-        """
-        Set asset to maintenance mode.
-        
-        Args:
-            remarks: Optional maintenance notes
-        """
-        self.status = 'maintenance'
+        self.lifecycle_stage = 'under_maintenance'
         if remarks:
             self.remarks = remarks
         self.updated_at = datetime.utcnow()
-    
+
     def retire_asset(self, remarks: Optional[str] = None) -> None:
-        """
-        Retire asset from active use.
-        
-        Args:
-            remarks: Optional retirement notes
-        """
-        self.status = 'retired'
+        self.lifecycle_stage = 'retired'
         if self.assigned_to:
             self.unassign()
         if remarks:
@@ -260,12 +264,6 @@ class Asset(db.Model):
         ).all()
     
     def to_dict(self) -> Dict[str, Any]:
-        """
-        Convert asset object to dictionary.
-        
-        Returns:
-            Dictionary representation of asset
-        """
         return {
             'id': self.id,
             'asset_tag': self.asset_tag,
@@ -296,7 +294,7 @@ class Asset(db.Model):
             'assign_date': self.assign_date.isoformat() if self.assign_date else None,
             'remove_date': self.remove_date.isoformat() if self.remove_date else None,
             'location': self.location,
-            'status': self.status,
+            'lifecycle_stage': self.lifecycle_stage,
             'condition': self.condition,
             'remarks': self.remarks,
             'created_at': self.created_at.isoformat() if self.created_at else None,

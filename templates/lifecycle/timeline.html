@@ -1,0 +1,123 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="page-header">
+    <div class="d-flex justify-content-between align-items-center">
+        <div>
+            <h1 class="mb-2"><i class="fas fa-history me-3"></i>Asset Timeline</h1>
+            <p class="text-muted mb-0">Lifecycle history for {{ asset.asset_tag }}</p>
+        </div>
+        <div>
+            <a href="{{ url_for('lifecycle.transition_asset', asset_id=asset.id) }}" class="btn btn-primary me-2">
+                <i class="fas fa-arrow-right me-2"></i>Transition
+            </a>
+            <a href="{{ url_for('assets.list_assets') }}" class="btn btn-outline-secondary">
+                <i class="fas fa-arrow-left me-2"></i>Back to Assets
+            </a>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-lg-4 mb-4">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title mb-0">
+                    <i class="fas fa-info-circle text-primary me-2"></i>Asset Information
+                </h5>
+            </div>
+            <div class="card-body">
+                <table class="table table-borderless mb-0">
+                    <tr>
+                        <td class="fw-bold ps-0" style="width: 40%;">Asset Tag</td>
+                        <td class="pe-0"><span class="badge bg-primary">{{ asset.asset_tag }}</span></td>
+                    </tr>
+                    <tr>
+                        <td class="fw-bold ps-0">Type</td>
+                        <td class="pe-0">{{ asset.asset_type.title() }}</td>
+                    </tr>
+                    <tr>
+                        <td class="fw-bold ps-0">Brand/Model</td>
+                        <td class="pe-0">{{ asset.brand or 'N/A' }} {{ asset.model or '' }}</td>
+                    </tr>
+                    <tr>
+                        <td class="fw-bold ps-0">Serial Number</td>
+                        <td class="pe-0"><code>{{ asset.serial_number }}</code></td>
+                    </tr>
+                    <tr>
+                        <td class="fw-bold ps-0">Current Stage</td>
+                        <td class="pe-0">
+                            {% set stage_colors = {
+                                'in_stock': 'info', 'assigned': 'success',
+                                'under_maintenance': 'warning', 'retired': 'secondary',
+                                'purchased': 'primary', 'requested': 'dark',
+                                'returned': 'teal', 'disposed': 'danger'
+                            } %}
+                            <span class="badge bg-{{ stage_colors.get(asset.lifecycle_stage, 'secondary') }}">
+                                {{ asset.lifecycle_stage.replace('_', ' ').title() }}
+                            </span>
+                        </td>
+                    </tr>
+                    {% if asset.assigned_to %}
+                    <tr>
+                        <td class="fw-bold ps-0">Assigned To</td>
+                        <td class="pe-0"><i class="fas fa-user text-success me-1"></i>{{ asset.assigned_to }}</td>
+                    </tr>
+                    {% endif %}
+                    <tr>
+                        <td class="fw-bold ps-0">Location</td>
+                        <td class="pe-0">{{ asset.location or 'N/A' }}</td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-8 mb-4">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title mb-0">
+                    <i class="fas fa-stream text-info me-2"></i>Timeline
+                </h5>
+            </div>
+            <div class="card-body">
+                {% if entries %}
+                <div class="timeline">
+                    {% for entry in entries %}
+                    <div class="timeline-item">
+                        <div class="d-flex justify-content-between align-items-start">
+                            <div>
+                                <strong>{{ entry.action }}</strong>
+                                {% if entry.description %}
+                                <p class="mb-1 text-muted">{{ entry.description }}</p>
+                                {% endif %}
+                                {% if entry.performed_by %}
+                                <small class="text-muted">
+                                    <i class="fas fa-user me-1"></i>{{ entry.performed_by }}
+                                </small>
+                                {% endif %}
+                            </div>
+                            <div class="text-end ms-3">
+                                <small class="time">{{ entry.created_at.strftime('%Y-%m-%d %H:%M') if entry.created_at else '' }}</small>
+                                {% if entry.previous_status and entry.new_status %}
+                                <br>
+                                <span class="badge bg-secondary">{{ entry.previous_status }}</span>
+                                <i class="fas fa-arrow-right mx-1 small"></i>
+                                <span class="badge bg-primary">{{ entry.new_status }}</span>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% else %}
+                <div class="text-center py-5">
+                    <i class="fas fa-history fa-3x text-muted mb-3"></i>
+                    <h6 class="text-muted">No Timeline Entries</h6>
+                    <p class="text-muted small mb-0">Timeline entries will appear as the asset progresses through its lifecycle.</p>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
