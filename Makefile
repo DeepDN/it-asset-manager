@@ -1,200 +1,216 @@
-# IT Asset Manager - Docker Operations Makefile
+# IT Asset Manager - Development Makefile
+# Author: Deepak Nemade
+# LinkedIn: https://www.linkedin.com/in/deepak-nemade/
 
-.PHONY: help build up down logs test clean security performance deploy
+.PHONY: help install dev prod test lint security-check clean backup restore
 
 # Default target
 help: ## Show this help message
-	@echo "IT Asset Manager - Docker Operations"
-	@echo "===================================="
-	@echo ""
-	@echo "Available commands:"
-	@awk 'BEGIN {FS = ":.*?## "} /^[a-zA-Z_-]+:.*?## / {printf "  %-20s %s\n", $$1, $$2}' $(MAKEFILE_LIST)
+	@echo "IT Asset Manager - Development Commands"
+	@echo "======================================"
+	@awk 'BEGIN {FS = ":.*?## "} /^[a-zA-Z_-]+:.*?## / {printf "\033[36m%-20s\033[0m %s\n", $$1, $$2}' $(MAKEFILE_LIST)
 
-# Development commands
-build: ## Build Docker images
-	docker-compose build
+# Installation and Setup
+install: ## Install dependencies and setup environment
+	@echo "🔧 Installing dependencies..."
+	pip install -r requirements-dev.txt
+	@echo "✅ Dependencies installed"
 
-up: ## Start development environment
-	docker-compose up -d
-	@echo "Application starting at http://localhost:5000"
-	@echo "Nginx proxy at http://localhost:80"
+dev-setup: ## Setup development environment
+	@echo "🚀 Setting up development environment..."
+	./dev-setup.sh
 
-down: ## Stop all services
-	docker-compose down
+# Development Environment
+dev: ## Start development environment
+	@echo "🚀 Starting development environment..."
+	docker-compose -f docker-compose.dev.yml up -d
+	@echo "✅ Development environment started at http://localhost:5000"
 
-logs: ## Show application logs
-	docker-compose logs -f app-dev
+dev-build: ## Build development containers
+	@echo "🔨 Building development containers..."
+	docker-compose -f docker-compose.dev.yml build
 
-shell: ## Access application shell
-	docker-compose exec app-dev /bin/bash
+dev-logs: ## View development logs
+	docker-compose -f docker-compose.dev.yml logs -f
 
-db-shell: ## Access database shell
-	docker-compose exec postgres-dev psql -U it_assets_user -d it_assets_dev
+dev-shell: ## Access development container shell
+	docker-compose -f docker-compose.dev.yml exec app bash
 
-redis-shell: ## Access Redis shell
-	docker-compose exec redis-dev redis-cli
+dev-stop: ## Stop development environment
+	@echo "🛑 Stopping development environment..."
+	docker-compose -f docker-compose.dev.yml down
 
-# Production commands
-prod-build: ## Build production images
+dev-restart: ## Restart development environment
+	@echo "🔄 Restarting development environment..."
+	docker-compose -f docker-compose.dev.yml restart
+
+# Production Environment
+prod: ## Start production environment
+	@echo "🚀 Starting production environment..."
+	docker-compose -f docker-compose.prod.yml up -d
+	@echo "✅ Production environment started at http://localhost"
+
+prod-build: ## Build production containers
+	@echo "🔨 Building production containers..."
 	docker-compose -f docker-compose.prod.yml build
 
-prod-up: ## Start production environment
-	@if [ ! -f .env ]; then echo "Error: .env file not found. Copy .env.example to .env and configure it."; exit 1; fi
-	docker-compose -f docker-compose.prod.yml up -d
-	@echo "Production application starting at https://localhost"
-
-prod-down: ## Stop production environment
-	docker-compose -f docker-compose.prod.yml down
-
-prod-logs: ## Show production logs
+prod-logs: ## View production logs
 	docker-compose -f docker-compose.prod.yml logs -f
 
-prod-scale: ## Scale production application (usage: make prod-scale REPLICAS=4)
-	docker-compose -f docker-compose.prod.yml up -d --scale app=$(or $(REPLICAS),2)
+prod-stop: ## Stop production environment
+	@echo "🛑 Stopping production environment..."
+	docker-compose -f docker-compose.prod.yml down
 
-# Monitoring commands
-monitoring-up: ## Start with monitoring stack
-	docker-compose -f docker-compose.prod.yml --profile monitoring up -d
-	@echo "Grafana available at http://localhost:3000"
-	@echo "Prometheus available at http://localhost:9090"
-
-monitoring-down: ## Stop monitoring stack
-	docker-compose -f docker-compose.prod.yml --profile monitoring down
-
-# Testing commands
+# Testing
 test: ## Run all tests
-	docker-compose -f docker-compose.test.yml up --build app-test
-	docker-compose -f docker-compose.test.yml down
+	@echo "🧪 Running tests..."
+	python -m pytest tests/ -v --cov=it_asset_manager --cov-report=html --cov-report=term
 
 test-unit: ## Run unit tests only
-	docker-compose exec app-dev pytest tests/unit/ -v
+	@echo "🧪 Running unit tests..."
+	python -m pytest tests/unit/ -v
 
-test-integration: ## Run integration tests
-	docker-compose -f docker-compose.test.yml up --build app-test
-	docker-compose -f docker-compose.test.yml down
+test-integration: ## Run integration tests only
+	@echo "🧪 Running integration tests..."
+	python -m pytest tests/integration/ -v
 
-test-coverage: ## Run tests with coverage report
-	docker-compose -f docker-compose.test.yml up --build app-test
-	@echo "Coverage report available in htmlcov/index.html"
+test-coverage: ## Generate test coverage report
+	@echo "📊 Generating coverage report..."
+	python -m pytest tests/ --cov=it_asset_manager --cov-report=html
+	@echo "📊 Coverage report generated in htmlcov/"
 
-performance: ## Run performance tests
-	docker-compose -f docker-compose.test.yml up -d app-dev
-	docker-compose -f docker-compose.test.yml run --rm k6
-	docker-compose -f docker-compose.test.yml down
+test-watch: ## Run tests in watch mode
+	@echo "👀 Running tests in watch mode..."
+	python -m pytest tests/ -f
 
-security: ## Run security tests
-	docker-compose -f docker-compose.test.yml up -d app-dev
-	docker-compose -f docker-compose.test.yml run --rm zap
-	docker-compose -f docker-compose.test.yml down
-	@echo "Security report available in zap_results volume"
+# Code Quality
+lint: ## Run code linting
+	@echo "🔍 Running code linting..."
+	flake8 it_asset_manager/ tests/ --max-line-length=88 --extend-ignore=E203,W503
+	black --check it_asset_manager/ tests/
+	isort --check-only it_asset_manager/ tests/
 
-# Database commands
-db-backup: ## Create database backup
-	@if [ -f docker-compose.prod.yml ]; then \
-		docker-compose -f docker-compose.prod.yml exec postgres-backup /backup.sh; \
-	else \
-		docker-compose exec postgres-dev pg_dump -U it_assets_user -d it_assets_dev > backup_$$(date +%Y%m%d_%H%M%S).sql; \
-	fi
+format: ## Format code
+	@echo "✨ Formatting code..."
+	black it_asset_manager/ tests/
+	isort it_asset_manager/ tests/
+	@echo "✅ Code formatted"
 
-db-restore: ## Restore database from backup (usage: make db-restore BACKUP=backup_file.sql)
-	@if [ -z "$(BACKUP)" ]; then echo "Error: Please specify BACKUP=filename"; exit 1; fi
-	docker-compose exec postgres-dev psql -U it_assets_user -d it_assets_dev < $(BACKUP)
+# Security
+security-check: ## Run security checks
+	@echo "🔒 Running security checks..."
+	bandit -r it_asset_manager/ -f json -o security-report.json || true
+	safety check --json --output safety-report.json || true
+	@echo "🔒 Security reports generated"
 
-db-reset: ## Reset development database
-	docker-compose down
-	docker volume rm it-asset-manager_postgres_dev_data || true
-	docker-compose up -d postgres-dev
-	@echo "Waiting for database to be ready..."
-	@sleep 10
-	docker-compose up -d app-dev
+security-scan-docker: ## Scan Docker images for vulnerabilities
+	@echo "🔍 Scanning Docker images..."
+	docker run --rm -v /var/run/docker.sock:/var/run/docker.sock \
+		-v $(PWD):/root/.cache/ aquasec/trivy image it-asset-manager:latest
 
-# Maintenance commands
-clean: ## Clean up Docker resources
-	docker-compose down -v
-	docker system prune -f
-	docker volume prune -f
+# Database
+db-migrate: ## Run database migrations
+	@echo "🗄️ Running database migrations..."
+	python migrate_database.py
 
-clean-all: ## Clean up all Docker resources (including images)
-	docker-compose down -v --rmi all
-	docker system prune -af
-	docker volume prune -f
+db-seed: ## Seed database with sample data
+	@echo "🌱 Seeding database..."
+	python add_sample_data.py
 
-update: ## Update Docker images
-	docker-compose pull
-	docker-compose -f docker-compose.prod.yml pull
+db-reset: ## Reset database (WARNING: Deletes all data)
+	@echo "⚠️ Resetting database..."
+	@read -p "Are you sure? This will delete all data (y/N): " confirm && [ "$$confirm" = "y" ]
+	rm -f instance/it_assets.db
+	python app.py &
+	sleep 5
+	pkill -f "python app.py"
 
-health: ## Check application health
-	@echo "Checking application health..."
-	@curl -f http://localhost:5000/health || echo "Development app not responding"
-	@curl -f http://localhost/health || echo "Nginx proxy not responding"
+# Backup and Restore
+backup: ## Create database backup
+	@echo "💾 Creating backup..."
+	./backup.sh
 
-# SSL commands
-ssl-generate: ## Generate self-signed SSL certificates
-	mkdir -p docker/nginx/ssl
-	openssl req -x509 -nodes -days 365 -newkey rsa:2048 \
-		-keyout docker/nginx/ssl/key.pem \
-		-out docker/nginx/ssl/cert.pem \
-		-subj "/C=US/ST=State/L=City/O=Organization/CN=localhost"
-	@echo "Self-signed SSL certificates generated"
-
-# Deployment commands
-deploy-staging: ## Deploy to staging environment
-	@echo "Deploying to staging..."
-	git pull origin develop
-	docker-compose -f docker-compose.prod.yml build
-	docker-compose -f docker-compose.prod.yml up -d
-	@echo "Staging deployment completed"
-
-deploy-prod: ## Deploy to production environment
-	@echo "Deploying to production..."
-	@if [ -z "$(TAG)" ]; then echo "Error: Please specify TAG=version"; exit 1; fi
-	git checkout $(TAG)
-	docker-compose -f docker-compose.prod.yml build
-	docker-compose -f docker-compose.prod.yml up -d
-	@echo "Production deployment completed"
-
-# Development helpers
-dev-setup: ## Setup development environment
-	cp .env.example .env.dev
-	docker-compose build
-	docker-compose up -d
-	@echo "Development environment setup completed"
-	@echo "Application available at http://localhost:5000"
-	@echo "Default login: admin / admin123"
-
-dev-reset: ## Reset development environment
-	docker-compose down -v
-	docker-compose build --no-cache
-	docker-compose up -d
-	@echo "Development environment reset completed"
-
-# Utility commands
-status: ## Show service status
-	docker-compose ps
-
-stats: ## Show resource usage
-	docker stats --no-stream
-
-inspect: ## Inspect application container
-	docker-compose exec app-dev python -c "from it_asset_manager.core.app import create_app; app = create_app('development'); print('App created successfully')"
-
-# Backup and restore commands
-backup-all: ## Backup all data (database and volumes)
-	mkdir -p backups/$(shell date +%Y%m%d_%H%M%S)
-	$(MAKE) db-backup
-	docker run --rm -v it-asset-manager_sqlite_data:/data -v $(PWD)/backups:/backup alpine tar czf /backup/sqlite_backup_$(shell date +%Y%m%d_%H%M%S).tar.gz -C /data .
-	@echo "Full backup completed"
-
-restore-all: ## Restore all data (usage: make restore-all BACKUP_DIR=20231201_120000)
-	@if [ -z "$(BACKUP_DIR)" ]; then echo "Error: Please specify BACKUP_DIR=directory"; exit 1; fi
-	$(MAKE) db-restore BACKUP=$(PWD)/backups/$(BACKUP_DIR)/database.sql
-	docker run --rm -v it-asset-manager_sqlite_data:/data -v $(PWD)/backups:/backup alpine tar xzf /backup/sqlite_backup_*.tar.gz -C /data
-	@echo "Full restore completed"
+restore: ## Restore from backup
+	@echo "📥 Restoring from backup..."
+	@read -p "Enter backup file path: " backup_file && \
+	cp "$$backup_file" instance/it_assets.db
 
 # Documentation
 docs: ## Generate documentation
-	@echo "Documentation available at:"
-	@echo "  - README.md - Main documentation"
-	@echo "  - docs/DOCKER.md - Docker deployment guide"
-	@echo "  - docs/ARCHITECTURE.md - Architecture documentation"
-	@echo "  - docs/DEVELOPMENT.md - Development guide"
+	@echo "📚 Generating documentation..."
+	sphinx-build -b html docs/ docs/_build/
+
+docs-serve: ## Serve documentation locally
+	@echo "🌐 Serving documentation..."
+	cd docs/_build && python -m http.server 8080
+
+# Cleanup
+clean: ## Clean up temporary files
+	@echo "🧹 Cleaning up..."
+	find . -type f -name "*.pyc" -delete
+	find . -type d -name "__pycache__" -delete
+	rm -rf .pytest_cache/
+	rm -rf htmlcov/
+	rm -rf .coverage
+	rm -f security-report.json safety-report.json
+	@echo "✅ Cleanup complete"
+
+clean-docker: ## Clean up Docker resources
+	@echo "🧹 Cleaning Docker resources..."
+	docker system prune -f
+	docker volume prune -f
+
+# Performance
+performance-test: ## Run performance tests
+	@echo "⚡ Running performance tests..."
+	locust -f tests/performance/locustfile.py --headless -u 10 -r 2 -t 60s --host=http://localhost:5000
+
+# Utilities
+logs: ## View application logs
+	tail -f logs/app.log
+
+shell: ## Start Python shell with app context
+	@echo "🐍 Starting Python shell..."
+	python -c "from app import app; app.app_context().push(); import IPython; IPython.embed()"
+
+update-deps: ## Update dependencies
+	@echo "📦 Updating dependencies..."
+	pip-compile requirements.in
+	pip-compile requirements-dev.in
+
+check-deps: ## Check for dependency vulnerabilities
+	@echo "🔍 Checking dependencies..."
+	safety check
+
+# Git hooks
+pre-commit: ## Run pre-commit checks
+	@echo "🔍 Running pre-commit checks..."
+	pre-commit run --all-files
+
+install-hooks: ## Install git hooks
+	@echo "🪝 Installing git hooks..."
+	pre-commit install
+
+# Docker utilities
+docker-stats: ## Show Docker container stats
+	docker stats
+
+docker-inspect: ## Inspect Docker containers
+	docker-compose -f docker-compose.dev.yml ps
+
+# Environment info
+env-info: ## Show environment information
+	@echo "Environment Information:"
+	@echo "======================"
+	@echo "Python version: $$(python --version)"
+	@echo "Docker version: $$(docker --version)"
+	@echo "Docker Compose version: $$(docker-compose --version)"
+	@echo "Git version: $$(git --version)"
+	@echo "Current branch: $$(git branch --show-current)"
+	@echo "Working directory: $$(pwd)"
+
+# Quick start
+quick-start: dev-setup dev ## Quick start development environment
+	@echo "🎉 Development environment is ready!"
+	@echo "Access the application at: http://localhost:5000"
+	@echo "Login with: admin / admin123"

@@ -1,0 +1,28 @@
+FROM python:3.11-slim
+
+# Install development tools
+RUN apt-get update && apt-get install -y \
+    curl \
+    git \
+    vim \
+    htop \
+    postgresql-client \
+    redis-tools \
+    && rm -rf /var/lib/apt/lists/*
+
+# Install Python development tools
+RUN pip install --no-cache-dir \
+    pytest \
+    pytest-cov \
+    black \
+    flake8 \
+    bandit \
+    safety \
+    pre-commit \
+    ipython \
+    jupyter
+
+WORKDIR /app
+
+# Keep container running
+CMD ["tail", "-f", "/dev/null"]
